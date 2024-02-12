@@ -1,10 +1,38 @@
 {
   "expo": {
-    "name": "NaiselTracker",
-    "slug": "NaiselTracker",
+    "name": "Naisel - Habit - Traker",
+    "slug": "Naise-Habit-Traker",
     "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/logo.png",
+    "splash": {
+      "image": "./assets/logo.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#202020"
+    },
+    "updates": {
+      "fallbackToCacheTimeout": 0
+    },
     "assetBundlePatterns": [
       "**/*"
-    ]
+    ],
+    "ios": {
+      "supportsTablet": true
+    },
+    "android": {
+      "package": "com.naisel.naiselhabittraker",
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/logo.png",
+        "backgroundColor": "#FFFFFF"
+      }
+    },
+    "web": {
+      "favicon": "./path/to/your/favicon.png"
+    },
+    "extra": {
+      "eas": {
+        "projectId": "5c4bdf0b-41e0-4d00-8da4-078868e00606"
+      }
+    }
   }
 }

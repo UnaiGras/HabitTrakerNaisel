@@ -1,59 +1,90 @@
 import React from 'react';
-import { StyleSheet, View, Text, Animated } from 'react-native';
+import { StyleSheet, View, Text, Animated, TouchableOpacity } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { RectButton, Swipeable } from 'react-native-gesture-handler';
 
-const HabitCard = ({ title, icon, duration, color }) => {
+const HabitCard = ({ 
+  title, 
+  icon, 
+  duration, 
+  color, 
+  onComplete, 
+  isCompleted, 
+  openInfo
+}) => {
   const renderRightAction = (progress) => {
     const trans = progress.interpolate({
       inputRange: [0, 1],
       outputRange: [80, 0],
     });
 
+    const handleComplete = () => {
+      console.log("Habito ", title, "completado")
+      // Aquí llamas a la función pasada como prop cuando se completa un hábito
+      onComplete();
+    };
+
     return (
-      <Animated.View style={{ flex: 1, transform: [{ translateX: trans }] }}>
+      <Animated.View style={{ 
+        flex: 1, 
+        transform: [{ 
+          translateX: trans 
+          }] }}>
         <RectButton
           style={styles.rightAction}
-          onPress={() => console.log('Habit completed!')}
+          onPress={handleComplete} // Usar handleComplete aquí
         >
-          <Ionicons name="checkbox" size={80} color="green" style={styles.actionIcon} />
+          <Ionicons name="checkbox" size={60} color="#38ec76" style={styles.actionIcon} />
         </RectButton>
       </Animated.View>
     );
   };
 
   const renderRightActions = progress => (
-    <View style={{ width: 120, flexDirection: 'row' }}>
+    <View style={{ width: 100, flexDirection: 'row' }}>
       {renderRightAction(progress)}
     </View>
   );
 
   return (
+
     <Swipeable renderRightActions={renderRightActions}>
-      <View style={[styles.card, { backgroundColor: '#333' }]}>
+    <RectButton onPress={openInfo} style={[styles.card, isCompleted && styles.completedCard]}>
+      
         <Ionicons style={styles.icon} name={icon} size={38} color={color} />
-        <Text style={styles.title}>{title}</Text>
+        <Text style={[styles.title, isCompleted && styles.completedTitle]}>{title}</Text>
         <Text style={styles.duration}>{duration}</Text>
-      </View>
+      
+      </RectButton>
     </Swipeable>
+
   );
 };
 
 const styles = StyleSheet.create({
   card: {
-    backgroundColor: '#333',
-    borderRadius: 10,
-    padding: 16,
-    marginBottom: 10,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    paddingVertical: 25
+    padding: 16,
+    marginVertical: 8,
+    borderRadius: 20,
+    backgroundColor: '#252525', // Fondo original de la tarjeta
+    borderRightWidth: 4,
+    borderRightColor: 'transparent', // Borde derecho por defecto
+  },
+  completedCard: {
+    opacity: 0.5, // Hace la tarjeta más transparente si está completada
+    borderRightColor: '#38ec76', // Borde derecho verde si está completada
   },
   title: {
     color: 'white',
     fontSize: 18,
-    fontWeight: "700"
+    fontWeight: "700",
+    maxWidth: "60%"
+  },
+  completedTitle: {
+    textDecorationLine: 'line-through', // Tacha el título si el hábito está completado
   },
   icon: {
     marginRight: 10,
@@ -71,7 +102,8 @@ const styles = StyleSheet.create({
   },
   actionIcon: {
     width: 30,
-    marginHorizontal: 25
+    marginHorizontal: 25,
+    borderRadius: 20
   },
   actionIcon: {
     alignSelf: 'center', // Asegura que el icono esté centrado en su eje

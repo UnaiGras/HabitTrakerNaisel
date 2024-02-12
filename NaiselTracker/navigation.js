@@ -6,64 +6,84 @@ import MainScreen from "./components/src/Main/MainScreen";
 import AddHabitScreen from "./components/src/Main/AddNewHabit";
 import ChallengesFeed from "./components/src/Challenges/ChallengesFeed";
 import TalkScreen from "./components/src/Talk/TalkScreen";
+import OnboardingScreen from "./components/src/Onboarding/OnboardingScreen";
+import LevelScreen from "./components/src/Main/levelScreen";
 
-const Stack = createStackNavigator()
+const Stack = createStackNavigator();
 
-export default function Navigation() {
+export default function Navigation({ userProfileExists }) { // Recibe userProfileExists como prop
     return (
         <NavigationContainer>
             <Stack.Navigator
-                initialRouteName='MainScreen'
+                initialRouteName={userProfileExists ? "MainScreen" : "OnboardingScreen"} // Decide la pantalla inicial basada en userProfileExists
                 screenOptions={{
                   gestureEnabled: true,
                   headerShown: false,
                   ...TransitionPresets.SlideFromRightIOS,
-                    }}
-                >
-                    <Stack.Screen
-                        name="MainScreen"
-                        component={MainScreen}
-                        
+                }}
+            >
+
+                    <>
+                        <Stack.Screen name="MainScreen" component={MainScreen} />
+                        <Stack.Screen
+                            name="AddHabitScreen"
+                            component={AddHabitScreen}
+                            options={{
+                                headerStyle: {
+                                    backgroundColor: '#151515',
+                                    shadowColor: "#191919",
+                                },
+                                headerTitleStyle: {
+                                    color: "white"
+                                }
+                            }}
+                        />
+                        <Stack.Screen
+                            name="ChallengesFeed"
+                            component={ChallengesFeed}
+                            options={{
+                                headerStyle: {
+                                    backgroundColor: '#151515',
+                                    shadowColor: "#191919",
+                                },
+                                headerTitleStyle: {
+                                    color: "white"
+                                }
+                            }}
+                        />
+                        <Stack.Screen
+                            name="TalkScreen"
+                            component={TalkScreen}
+                            options={{
+                                headerStyle: {
+                                    backgroundColor: '#151515',
+                                    shadowColor: "#191919",
+                                },
+                                headerTitleStyle: {
+                                    color: "white"
+                                }
+                            }}
+                        />
+                        <Stack.Screen
+                            name="LevelScreen"
+                            component={LevelScreen}
+                            options={{
+                                headerStyle: {
+                                    backgroundColor: '#151515',
+                                    shadowColor: "#191919",
+                                },
+                                headerTitleStyle: {
+                                    color: "white"
+                                }
+                            }}
+                        />
+                    </>
+                    <Stack.Screen 
+                        name="OnboardingScreen" 
+                        component={OnboardingScreen} 
                     />
-                <Stack.Screen
-                        name="AddHabitScreen"
-                        component={AddHabitScreen}
-                        options={{
-                        headerStyle: {
-                            backgroundColor: '#151515',
-                            shadowColor: "#191919",
-                        },
-                        headerTitleStyle: {
-                            color: "white"
-                        }
-                    }}
-                />
-                <Stack.Screen
-                        name="ChallengesFeed"
-                        component={ChallengesFeed}
-                        options={{
-                        headerStyle: {
-                            backgroundColor: '#151515',
-                            shadowColor: "#191919",
-                        },
-                        headerTitleStyle: {
-                            color: "white"
-                        }
-                    }}
-                />
-                <Stack.Screen
-                        name="TalkScreen"
-                        component={TalkScreen}
-                        options={{
-                        headerStyle: {
-                            backgroundColor: '#151515',
-                            shadowColor: "#191919",
-                        },
-                        headerTitleStyle: {
-                            color: "white"
-                        }
-                    }}
-                />
-                </Stack.Navigator>
+
+            </Stack.Navigator>
         </NavigationContainer>
-    )}
+    );
+}

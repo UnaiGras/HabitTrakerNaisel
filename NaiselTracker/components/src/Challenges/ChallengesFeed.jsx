@@ -98,7 +98,7 @@ const ChallengesFeed = ({navigation}) => {
     feedContainer: {
         flex: 1,
         padding: 20,
-        backgroundColor: '#252525', // Puedes ajustar según tu esquema de colores
+        backgroundColor: '#202020', // Puedes ajustar según tu esquema de colores
         paddingVertical: 60
     },
     screenText: {

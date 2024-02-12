@@ -43,14 +43,13 @@ const styles = StyleSheet.create({
 
 
 const AppBar = ({navigation, position}) => {
-    console.log(position, "esta es la posicion")
-    console.log(navigation, "<<--- esto es navigation")
+
     return(
         <View style={styles.container}>
             <TouchableOpacity
                 style={styles.button}
                 onPress={() => {
-                    navigation.goBack()
+                    navigation.navigate("MainScreen")
                 }}
             >
                 {position === "home" ? (
@@ -85,13 +84,16 @@ const AppBar = ({navigation, position}) => {
             }
             <TouchableOpacity
                 style={styles.button}
+                onPress={() => {
+                    navigation.navigate("LevelScreen")
+                }}
                 >
-                {position === "Inbox" ? (
-                <Ionicons name="stats-chart" size={25} color="#a565f2"/>
+                {position === "LevelScreen" ? (
+                <Ionicons name="diamond-outline" size={25} color="#a565f2"/>
                 ):(
-                <Ionicons name="stats-chart" size={25} color="white" />
+                <Ionicons name="diamond-outline" size={25} color="white" />
                 )}
-                <Text style={styles.text}>Stats</Text>
+                <Text style={styles.text}>Level</Text>
 
             </TouchableOpacity>
             <TouchableOpacity  

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
     View, 
     Text, 
@@ -10,32 +10,32 @@ import {
     FlatList
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons'; // Asegúrate de que tienes esta librería instalada
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
-const AddHabitScreen = () => {
+const AddHabitScreen = ({navigation}) => {
   const [habitName, setHabitName] = useState('');
   const [habitDuration, setHabitDuration] = useState('30m'); // Por ejemplo, '30m' para 30 minutos
   const [habitColor, setHabitColor] = useState('#FF6347'); // Un color por defecto, como el tomate
-  const [selectedIcon, setSelectedIcon] = useState('md-checkmark-circle'); // Un ícono por defecto
+  const [selectedIcon, setSelectedIcon] = useState(''); // Un ícono por defecto
   const [isFocused, setIsFocused] = useState(false);
   const [subtasks, setSubtasks] = useState([]);
   const [isIconPickerVisible, setIconPickerVisible] = useState(false);
   const [habitPoints, setHabitPoints] = useState(null);
+  const [habitDescription, setHabitDescription] = useState('');
   const pointsOptions = [10, 20, 30, 40, 50];
-  const [existingHabits, setExistingHabits] = useState([
-    { id: '1', points: 10 },
-    { id: '2', points: 20 },
-    // ... otros hábitos
-  ]);
+  const [existingHabits, setExistingHabits] = useState([]);
   
-  
-    // Lista de íconos para seleccionar (deberías tener estos íconos disponibles en tu app)
-  const iconsList = ['md-checkmark-circle', 'md-alarm', 'md-star', 'md-person', 'md-paw'];
-
   // Lista de duraciones predefinidas
   const durations = ['15m', '30m', '45m', '1h', '1,5h'];
 
   // Lista de colores para seleccionar
-  const colors = ['#FF6347', '#1E90FF', '#32CD32', '#FFD700', '#FF69B4'];
+  const colors = [
+    '#ee6fc6',
+    '#ee6f6f',
+    '#6f76ee',
+    '#6fee91',
+    '#ebee6f'
+  ];
 
   // Funciones para manejar los cambios
   const handleNameChange = (text) => setHabitName(text);
@@ -43,12 +43,6 @@ const AddHabitScreen = () => {
   const handleColorChange = (color) => setHabitColor(color);
   const handleIconChange = (icon) => setSelectedIcon(icon);
 
-  // Función para manejar la creación del hábito
-  const createHabit = () => {
-    // Aquí manejarías la lógica para crear el hábito
-    // Por ejemplo, enviar los datos a un backend o guardarlos en el estado de la app
-    console.log({ habitName, habitDuration, habitColor, selectedIcon });
-  };
 
   const addSubtask = () => {
     setSubtasks(currentSubtasks => [
@@ -74,6 +68,70 @@ const AddHabitScreen = () => {
       setHabitPoints(points);
     }
   };
+
+  const generateUniqueId = () => {
+    const timestamp = Date.now(); // Obtiene el timestamp actual
+    const randomComponent = Math.random().toString(36).substring(2, 15); // Genera una cadena aleatoria
+    return `${timestamp}-${randomComponent}`;
+  };
+  
+
+  const createHabit = async () => {
+    try {
+      // Obtener userProfile de AsyncStorage de forma asíncrona
+      const userProfileString = await AsyncStorage.getItem('userProfile');
+      const userProfile = userProfileString ? JSON.parse(userProfileString) : { activeHabits: [] };
+  
+      const newHabit = {
+        id: generateUniqueId(), // Un identificador único para el hábito, puedes usar una mejor estrategia para generar IDs.
+        name: habitName,
+        duration: habitDuration,
+        color: habitColor,
+        icon: selectedIcon,
+        subtasks: subtasks,
+        points: habitPoints || 0,
+        description: habitDescription,
+        lastCompletedDate: null, // Puedes usar esto para rastrear cuándo se completó el hábito por última vez.
+      };
+      
+      userProfile.activeHabits.push(newHabit);
+  
+      // Guardar userProfile actualizado en AsyncStorage de forma asíncrona
+      await AsyncStorage.setItem('userProfile', JSON.stringify(userProfile));
+
+      console.log("Se a creado el habito", newHabit)
+      navigation.goBack()
+      // Lógica adicional para éxito
+    } catch (error) {
+      // Manejar errores, por ejemplo, mostrar un mensaje de error
+      console.error(error);
+    }
+  };
+  
+
+  useEffect(() => {
+    const loadExistingHabits = async () => {
+      try {
+        // Leer userProfile de AsyncStorage de forma asíncrona
+        const userProfileString = await AsyncStorage.getItem('userProfile');
+        if (userProfileString) {
+          const userProfile = JSON.parse(userProfileString);
+          const habits = userProfile.activeHabits.map(habit => ({
+            id: habit.id,
+            points: habit.points
+          }));
+          setExistingHabits(habits);
+        }
+      } catch (error) {
+        // Manejar posibles errores, como un error al parsear JSON
+        console.error(error);
+      }
+    };
+  
+    loadExistingHabits();
+  }, []);
+  
+  
   
 
   return (
@@ -95,7 +153,13 @@ const AddHabitScreen = () => {
             onFocus={() => setIsFocused(true)}
             onBlur={() => setIsFocused(false)}
       />
-
+        <TextInput
+            style={styles.input}
+            onChangeText={setHabitDescription}
+            value={habitDescription}
+            placeholder="Descripción del hábito"
+            placeholderTextColor="#999"
+        />
         <TouchableOpacity onPress={() => setIconPickerVisible(true)} style={styles.iconPickerOpener}>
           {selectedIcon ? (
             <Ionicons name={selectedIcon} size={40} color="white" />
@@ -184,9 +248,9 @@ const AddHabitScreen = () => {
         </View>
 
       <TouchableOpacity style={styles.createButton} onPress={createHabit}>
-        <Text style={styles.createButtonText}>Create Task</Text>
+        <Text style={styles.createButtonText}>Create Habito</Text>
       </TouchableOpacity>
-      
+      <View style={{paddingVertical: 40}}/>
     </ScrollView>
     <Modal
       visible={isIconPickerVisible}
@@ -219,9 +283,7 @@ const AddHabitScreen = () => {
 };
 
 const styles = StyleSheet.create({
-    // Resto de tus estilos ...
-  
-    // Ajustes para el contenedor
+
     container: {
       flex: 1,
       padding: 20,
@@ -315,7 +377,7 @@ const styles = StyleSheet.create({
     },
     createButton: {
       backgroundColor: '#a565f2',
-      paddingVertical: 15,
+      paddingVertical: 20,
       paddingHorizontal: 30,
       borderRadius: 25, // Más redondeado que los botones de color y duración
       shadowColor: '#000',
@@ -342,7 +404,7 @@ const styles = StyleSheet.create({
       shadowOpacity: 0.1,
       shadowRadius: 10,
       elevation: 10, // Para Android
-      margin: 40, // Aumenta el margen superior para dar espacio adicional
+      margin: 40,
     },
     headerTitle: {
       fontSize: 24,
@@ -386,7 +448,7 @@ const styles = StyleSheet.create({
         marginRight: 10,
       },
       addSubtaskButton: {
-        backgroundColor: '#a565f2', // color lila
+        backgroundColor: '#353535', // color lila
         borderRadius: 10,
         padding: 10,
         alignItems: 'center',
