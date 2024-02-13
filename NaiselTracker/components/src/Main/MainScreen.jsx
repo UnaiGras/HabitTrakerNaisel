@@ -462,6 +462,8 @@ const MainScreen = ({navigation}) => {
           <ScoreCounter finalScore={userProfile.points}/>
         </View>
       </View>
+      <View >
+<View>
       <FlatList
           data={habits}
           renderItem={({ item }) => (
@@ -476,7 +478,10 @@ const MainScreen = ({navigation}) => {
               />
           )}
           keyExtractor={(item) => item.id.toString()}
+          contentContainerStyle={{paddingBottom: 50 }}
         />
+</View>
+        </View>
 
       <AppBar navigation={navigation} position={"home"}/>
       {milestoneModalVisible && currentMilestone && (

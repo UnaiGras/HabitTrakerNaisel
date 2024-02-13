@@ -30,8 +30,8 @@ const styles = StyleSheet.create({
         zIndex: 1, // Aseguramos que se superponga sobre los otros elementos
         backgroundColor: '#a565f2', // Añadimos un fondo, cambia el color como necesites
         borderRadius: 35, // Hacemos que el botón sea circular
-        width: 60, // Ajustamos el ancho del botón
-        height: 60, // Ajustamos la altura del botón
+        width: 55, // Ajustamos el ancho del botón
+        height: 55, // Ajustamos la altura del botón
         justifyContent: 'center', // Centramos el icono y texto en el botón
         shadowColor: '#a565f2', // Añadimos una sombra para darle profundidad
         shadowOffset: { width: 0, height: 4 },

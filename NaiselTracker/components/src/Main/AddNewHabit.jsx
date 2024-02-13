@@ -1,16 +1,16 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react'
 import { 
     View, 
     Text, 
     TextInput, 
     TouchableOpacity, 
-    StyleSheet, 
-    ScrollView, 
+    StyleSheet,
+    ScrollView,
     Modal,
     FlatList
-} from 'react-native';
-import { Ionicons } from '@expo/vector-icons'; // Asegúrate de que tienes esta librería instalada
-import AsyncStorage from '@react-native-async-storage/async-storage';
+} from 'react-native'
+import { Ionicons } from '@expo/vector-icons'
+import AsyncStorage from '@react-native-async-storage/async-storage'
 
 const AddHabitScreen = ({navigation}) => {
   const [habitName, setHabitName] = useState('');
@@ -43,21 +43,15 @@ const AddHabitScreen = ({navigation}) => {
   const handleColorChange = (color) => setHabitColor(color);
   const handleIconChange = (icon) => setSelectedIcon(icon);
 
-
-  const addSubtask = () => {
-    setSubtasks(currentSubtasks => [
-      ...currentSubtasks,
-      { id: currentSubtasks.length + 1, text: '' },
-    ]);
-  };
-
-  const handleSubtaskChange = (text, id) => {
+  const handleSubtaskChange = (name, id) => {
     setSubtasks(currentSubtasks =>
       currentSubtasks.map(subtask =>
-        subtask.id === id ? { ...subtask, text } : subtask
+        subtask.id === id ? { ...subtask, name: name } : subtask
       )
     );
   };
+  
+  
 
   const isPointsAssigned = (points) => {
     return existingHabits.some(habit => habit.points === points);
@@ -78,22 +72,28 @@ const AddHabitScreen = ({navigation}) => {
 
   const createHabit = async () => {
     try {
-      // Obtener userProfile de AsyncStorage de forma asíncrona
+      // El resto del código permanece igual
+
       const userProfileString = await AsyncStorage.getItem('userProfile');
       const userProfile = userProfileString ? JSON.parse(userProfileString) : { activeHabits: [] };
-  
+
+
+
       const newHabit = {
-        id: generateUniqueId(), // Un identificador único para el hábito, puedes usar una mejor estrategia para generar IDs.
+        id: generateUniqueId(),
         name: habitName,
         duration: habitDuration,
         color: habitColor,
         icon: selectedIcon,
-        subtasks: subtasks,
+        subTasks: subtasks.map(subtask => ({
+          id: subtask.id,
+          name: subtask.name // Asegúrate de que esto coincide con la estructura deseada
+        })),
         points: habitPoints || 0,
-        description: habitDescription,
-        lastCompletedDate: null, // Puedes usar esto para rastrear cuándo se completó el hábito por última vez.
+        desc: habitDescription,
+        lastCompletedDate: null,
       };
-      
+
       userProfile.activeHabits.push(newHabit);
   
       // Guardar userProfile actualizado en AsyncStorage de forma asíncrona
@@ -101,12 +101,20 @@ const AddHabitScreen = ({navigation}) => {
 
       console.log("Se a creado el habito", newHabit)
       navigation.goBack()
-      // Lógica adicional para éxito
+      
+      // El resto del código permanece igual
     } catch (error) {
-      // Manejar errores, por ejemplo, mostrar un mensaje de error
       console.error(error);
     }
   };
+  
+  const addSubtask = () => {
+    setSubtasks(currentSubtasks => [
+      ...currentSubtasks,
+      { id: currentSubtasks.length + 1, name: '' }, // Cambia 'text' por 'name'
+    ]);
+  };
+  
   
 
   useEffect(() => {
@@ -235,7 +243,7 @@ const AddHabitScreen = ({navigation}) => {
                  <Text style={styles.subtaskNumber}>{subtask.id}</Text>
                  <TextInput
                    style={styles.subtaskInput}
-                   value={subtask.text}
+                   value={subtask.name}
                    onChangeText={text => handleSubtaskChange(text, subtask.id)}
                    placeholder={`Subtarea ${subtask.id}`}
                    placeholderTextColor="#999"
