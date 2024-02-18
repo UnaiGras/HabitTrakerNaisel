@@ -8,6 +8,12 @@ import ChallengesFeed from "./components/src/Challenges/ChallengesFeed";
 import TalkScreen from "./components/src/Talk/TalkScreen";
 import OnboardingScreen from "./components/src/Onboarding/OnboardingScreen";
 import LevelScreen from "./components/src/Main/levelScreen";
+import ChallengeDetails from "./components/src/Challenges/ChallengeInfo";
+import SettingsScreen from "./components/src/settings/SettingsScreen";
+import ChatScreen from "./components/src/Talk/ChatScreen";
+import TimerScreen from "./components/src/General/TimerScreen";
+import StatsScreen from "./components/src/stats/StatsScreen";
+
 
 const Stack = createStackNavigator();
 
@@ -67,6 +73,71 @@ export default function Navigation({ userProfileExists }) { // Recibe userProfil
                         <Stack.Screen
                             name="LevelScreen"
                             component={LevelScreen}
+                            options={{
+                                headerStyle: {
+                                    backgroundColor: '#151515',
+                                    shadowColor: "#191919",
+                                },
+                                headerTitleStyle: {
+                                    color: "white"
+                                }
+                            }}
+                        />
+                        <Stack.Screen
+                            name="ChallengeDetails"
+                            component={ChallengeDetails}
+                            options={{
+                                headerStyle: {
+                                    backgroundColor: '#151515',
+                                    shadowColor: "#191919",
+                                },
+                                headerTitleStyle: {
+                                    color: "white"
+                                }
+                            }}
+                        />
+                        <Stack.Screen
+                            name="SettingsScreen"
+                            component={SettingsScreen}
+                            options={{
+                                headerStyle: {
+                                    backgroundColor: '#151515',
+                                    shadowColor: "#191919",
+                                },
+                                headerTitleStyle: {
+                                    color: "white"
+                                }
+                            }}
+                        />
+                        <Stack.Screen
+                            name="ChatScreen"
+                            component={ChatScreen}
+                            options={{
+                                headerStyle: {
+                                    backgroundColor: '#151515',
+                                    shadowColor: "#191919",
+                                },
+                                headerTitleStyle: {
+                                    color: "white"
+                                }
+                            }}
+                        />
+                        <Stack.Screen
+                            name="TimerScreen"
+                            component={TimerScreen}
+                            options={{
+                                headerStyle: {
+                                    backgroundColor: '#151515',
+                                    shadowColor: "#191919",
+                                },
+                                headerTitleStyle: {
+                                    color: "white"
+                                }
+                            }}
+                        />
+                        <Stack.Screen
+                            name="StatsScreen"
+                            component={StatsScreen}
                             options={{
                                 headerStyle: {
                                     backgroundColor: '#151515',

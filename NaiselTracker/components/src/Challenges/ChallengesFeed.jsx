@@ -5,9 +5,9 @@ import AppBar from '../General/AppBar';
 
 const challenges = [{
     id: 28398,
-    title: "Una Vida Saludable con 20min Al Dia",
+    title: "Una Vida Saludable En 1 Mes",
     desc: "Los cientificos han demostrado que con solo 30 min al dia se pueden conseguir muy buenos resultados en cuanto a la mejora de el estado de animo y estado fisico",
-    image: require("../../../assets/excursionismo.png"),
+    image: "leaf",
     pts: 550,
     days: 31,
     habits: 
@@ -173,7 +173,7 @@ const ChallengesFeed = ({navigation}) => {
       <View style={styles.feedContainer}>
         <Text style={styles.screenText}>Retos</Text>
         {challenges.map((challenge, index) => (
-          <TouchableOpacity>
+          <TouchableOpacity onPress={() => navigation.navigate("ChallengeDetails", {challenge: challenge})}>
             <ChallengeCard
               key={index}
               title={challenge.title}
@@ -249,6 +249,6 @@ const ChallengesFeed = ({navigation}) => {
         alignSelf: "center",
         marginVertical: 20,
         color: "white"
-    }
+    },
   });
   

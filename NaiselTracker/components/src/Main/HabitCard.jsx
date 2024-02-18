@@ -2,6 +2,7 @@ import React from 'react';
 import { StyleSheet, View, Text, Animated, TouchableOpacity } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { RectButton, Swipeable } from 'react-native-gesture-handler';
+import { useNavigation } from '@react-navigation/native';
 
 const HabitCard = ({ 
   title, 
@@ -12,6 +13,9 @@ const HabitCard = ({
   isCompleted, 
   openInfo
 }) => {
+
+  const navigation = useNavigation()
+
   const renderRightAction = (progress) => {
     const trans = progress.interpolate({
       inputRange: [0, 1],
@@ -40,6 +44,19 @@ const HabitCard = ({
     );
   };
 
+  const navigateToTimer = () => {
+    // Extrae solo los dígitos de la cadena de duración, asumiendo que siempre termina con "m"
+    const minutesOnly = parseInt(duration);
+  
+    navigation.navigate('TimerScreen', {
+      minutes: minutesOnly,
+      color: color,
+      iconName: icon, // Aquí usas el icono que ya viene como prop
+      title: title
+    });
+  };
+  
+
   const renderRightActions = progress => (
     <View style={{ width: 100, flexDirection: 'row' }}>
       {renderRightAction(progress)}
@@ -49,13 +66,21 @@ const HabitCard = ({
   return (
 
     <Swipeable renderRightActions={renderRightActions}>
-    <RectButton onPress={openInfo} style={[styles.card, isCompleted && styles.completedCard]}>
-      
-        <Ionicons style={styles.icon} name={icon} size={38} color={color} />
-        <Text style={[styles.title, isCompleted && styles.completedTitle]}>{title}</Text>
-        <Text style={styles.duration}>{duration}</Text>
-      
-      </RectButton>
+    <View style={[styles.card, isCompleted && styles.completedCard]}>
+        {/* Botón para abrir información detallada del hábito */}
+        <TouchableOpacity onPress={openInfo} style={styles.infoArea}>
+          <Ionicons style={styles.icon} name={icon} size={38} color={color} />
+          <Text style={[styles.title, isCompleted && styles.completedTitle]}>
+            {title}
+          </Text>
+        </TouchableOpacity>
+
+        {/* Botón separado para la duración */}
+        <TouchableOpacity onPress={navigateToTimer} style={styles.durationButton}>
+          <Ionicons name="timer-outline" size={24} color="#FFF" />
+          <Text style={styles.duration}>{duration}</Text>
+        </TouchableOpacity>
+      </View>
     </Swipeable>
 
   );
@@ -81,7 +106,7 @@ const styles = StyleSheet.create({
     color: 'white',
     fontSize: 18,
     fontWeight: "700",
-    maxWidth: "60%"
+    maxWidth: "90%"
   },
   completedTitle: {
     textDecorationLine: 'line-through', // Tacha el título si el hábito está completado
@@ -109,6 +134,11 @@ const styles = StyleSheet.create({
     alignSelf: 'center', // Asegura que el icono esté centrado en su eje
     justifyContent: "center",
     marginBottom: 10
+  },
+  infoArea: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    // Estilos adicionales si son necesarios
   },
   // Agrega más estilos según sea necesario
 });

@@ -1,12 +1,12 @@
 import React from 'react';
-import { View, Text, Image, StyleSheet } from 'react-native';
+import { View, Text, Image, StyleSheet, TouchableOpacity } from 'react-native';
 import AppBar from '../General/AppBar';
 
-const ProfessionalCard = ({ title, desc, image, pts }) => {
+const ProfessionalCard = ({ name, desc, image, pts }) => {
   return (
     <View style={styles.cardContainer}>
       <View style={styles.textContainer}>
-        <Text style={styles.title}>{title}</Text>
+        <Text style={styles.name}>{name}</Text>
         <Text style={styles.desc} numberOfLines={8}>{desc}</Text>
       </View>
       <Image source={image} style={styles.image} />
@@ -20,12 +20,21 @@ const TalkScreen = ({navigation}) => {
       <View style={styles.screenContainer}>
         <Text style={styles.screenText}>Apoyo</Text>
         {professionals.map((professional, index) => (
+          <TouchableOpacity onPress={() => navigation.navigate("ChatScreen", {
+            name: professional.name,
+            desc: professional.desc,
+            image: professional.image,
+            context:professional.context,
+            pts: professional.pts,
+          })}>
           <ProfessionalCard
             key={index}
-            title={professional.title}
+            name={professional.name}
             desc={professional.desc}
             image={professional.image}
           />
+          </TouchableOpacity>
+
         ))}
         <AppBar navigation={navigation} position={"talk"}/>
       </View>
@@ -59,7 +68,7 @@ const TalkScreen = ({navigation}) => {
       textContainer: {
         flex: 1,
       },
-      title: {
+      name: {
         fontSize: 18,
         color: 'white',
         fontWeight: 'bold',
@@ -103,12 +112,13 @@ const TalkScreen = ({navigation}) => {
 
 
 const professionals = [{
-    title: "Alex",
+    name: "Alex",
     desc: "Experto en salud, ejercicio y rutinas. Crea y aplica tus rutinas en para llegar a el punto que estas buscando.",
     image: require("../../../assets/terapeuta.png"),
+    context: "you are an alimentation and exercise profesional",
     pts: 550
 }, {
-    title: "Rocio",
+    name: "Rocio",
     desc: "Experta en trastornos como Depresión y Ansiedad desde hace mas de 20 años.Puedes hablar con ella lo que quieras, desde hacer sesiones de introspeccion hasta establecimiento de un plan de accion",
     image: require("../../../assets/psicologo.png"),
     pts: 800

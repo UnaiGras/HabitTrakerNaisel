@@ -16,39 +16,45 @@ userProfile ={
           { id: 2, name: "Ejercicios de alta intensidad" },
         ]
         },
-        {
-          id: 2,
-          name: "Planificación de objetivos a largo plazo",
-          icon: "bookmark",
-          desc: "Establecer y revisar objetivos a largo plazo para el desarrollo personal y profesional.",
-          duration: 10,
-          points: 10,
-          color: "#f3735f",
-          lastCompletedDate: "2024-02-08",
-          subTasks: [
-          { id: 1, name: "Definir objetivos SMART" },
-          { id: 2, name: "Crear un plan de acción" },
-          ]
-        },
-        {
-          id: 3,
-          name: "Desafío de habilidades nuevas",
-          icon: "bulb",
-          desc: "Adquirir y practicar una nueva habilidad o hobby que estimule el crecimiento personal o profesional.",
-          duration: 60,
-          points: 30,
-          color: "#65cce8",
-          lastCompletedDate: "2024-02-08",
-          subTasks: [
-            { id: 1, name: "Investigar y seleccionar una nueva habilidad para aprender" },
-            { id: 2, name: "Dedicar tiempo semanalmente para practicar y mejorar" },
-          ]
-        }
     ],
     premium: false,
-    activeChallenges:[]   ,
+    activeChallenges:[],
+    currentStreak: {
+      count: 0, // Número actual de días consecutivos completando hábitos
+      startDate: null, // Fecha de inicio de la racha actual
+    },
+    productivity: {
+      current: 59, // Porcentaje actual de productividad
+      history: [ // Registro histórico para mostrar en gráfico
+        { date: '2024-02-08', productivity: 50 },
+        { date: '2024-02-09', productivity: 55 },
+      ],
+    },
+    habitsCompletion: {
+      '2024-02-08': ['completed', 'skipped', 'todo'],
+      '2024-02-09': ['completed', 'completed', 'todo'],
+    },
+    achievements: [
+      {
+        name: 'Ideal Day',
+        description: 'Complete all your habits in a day',
+        streak: 1,
+        icon: 'medal',
+        color: '#FFD700',
+      },
+      {
+        name: 'Tiptop Triple',
+        description: 'Complete all your habits for three days in a row',
+        streak: 3,
+        icon: 'rocket',
+        color: '#8A2BE2',
+      },
+    ],
     milestones: {
-        currentMilestone: 0,
-        nextMilestone: 1
-    }
+      currentMilestone: 0,
+      nextMilestone: 1,
+      history: [ // Historial de hitos alcanzados
+        { milestone: 1, dateAchieved: '2024-02-09' },
+      ],
+    },
 }

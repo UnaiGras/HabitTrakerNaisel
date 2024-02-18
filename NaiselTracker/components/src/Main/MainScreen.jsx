@@ -212,6 +212,36 @@ const styles = StyleSheet.create({
       textDecorationLine: 'line-through',
       color: '#777777', // Un color más tenue para el texto completado
     },
+    selectedButton: {
+      // Estilo para el botón seleccionado
+      backgroundColor: "#191919",
+      borderRadius: 20,
+    },
+    unselectedButton: {
+      // Estilo para el botón no seleccionado
+      backgroundColor: "transparent",
+    },
+    toggleButtonText: {
+      // Estilos base para el texto de tus botones
+      color: 'white',
+      textAlign: 'center',
+      fontWeight: 14
+    },
+    selectedButtonText: {
+      fontWeight: 16
+    },
+    unselectedButtonText: {
+      // Opcional: Estilo adicional para el texto del botón no seleccionado si es necesario
+    },
+    toggleButton: {
+      justifyContent: "center",
+      padding: 10,
+      paddingHorizontal: 20,
+      width: "50%"
+    },
+    completedAllHabitsStyle: {
+      
+    }
     // Continuar con los estilos para modalBody, addButton, tabContainer, etc.
   
 });
@@ -244,7 +274,11 @@ const MainScreen = ({navigation}) => {
     const [currentMilestone, setCurrentMilestone] = useState(null);
     const [habits, setHabits] = useState([]);
     const [selectedHabit, setSelectedHabit] = useState(null);
-
+    const [viewMode, setViewMode] = useState('userHabits'); // 'userHabits' o 'challengeHabits'
+    
+    const [challengeHabits, setChallengeHabits] = useState([]);
+    const [completedChallengeHabits, setCompletedChallengeHabits] = useState(new Set());
+    
     const [completedHabits, setCompletedHabits] = useState(new Set());
     const [daysCompletedAllHabits, setDaysCompletedAllHabits] = useState([false, false, false, false, false, false, false]);
 
@@ -270,7 +304,6 @@ const MainScreen = ({navigation}) => {
         
         let userProfile = JSON.parse(userProfileString);
         userProfile.points += pointsToAdd;
-        console.log(userProfile)
         
         
         let milestoneReached = null;
@@ -306,7 +339,7 @@ const MainScreen = ({navigation}) => {
     
       try {
         // Actualiza puntos y verifica hitos, obteniendo el userProfile actualizado
-        const updatedUserProfile = await updatePointsAndCheckMilestones(pointsToAdd);
+        let updatedUserProfile = await updatePointsAndCheckMilestones(pointsToAdd);
         if (!updatedUserProfile) return;
     
         // Encuentra el hábito y actualiza su última fecha de completado usando el userProfile actualizado
@@ -314,6 +347,8 @@ const MainScreen = ({navigation}) => {
         if (habitIndex !== -1) {
           updatedUserProfile.activeHabits[habitIndex].lastCompletedDate = today;
 
+          console.log("Se a actualizado el esatdo de el habito en localstorage")
+    
           if (!updatedUserProfile.dailyHabitTracking) {
             updatedUserProfile.dailyHabitTracking = {};
           }
@@ -321,9 +356,13 @@ const MainScreen = ({navigation}) => {
             updatedUserProfile.dailyHabitTracking[today] = [];
           }
           updatedUserProfile.dailyHabitTracking[today].push(habitId); // Añade el ID del hábito completado
-
-          
-          await AsyncStorage.setItem('userProfile', JSON.stringify(updatedUserProfile)); // Guarda el userProfile actualizado en AsyncStorage
+    
+          // Verifica si se han completado todos los hábitos para hoy y actualiza la racha y la productividad
+          updatedUserProfile = checkAndUpdateStreak(updatedUserProfile, today);
+          updatedUserProfile = updateProductivity(updatedUserProfile, today);
+    
+          // Guarda el userProfile actualizado en AsyncStorage
+          await AsyncStorage.setItem('userProfile', JSON.stringify(updatedUserProfile));
           setCompletedHabits(prev => new Set(prev).add(habitId)); // Actualiza el estado de los hábitos completados
         }
       } catch (error) {
@@ -331,9 +370,47 @@ const MainScreen = ({navigation}) => {
       }
     };
     
+
+    const handleCompleteChallengeHabit = async (habitId) => {
+      const todayStr = new Date().toISOString().split('T')[0];
+    
+      if (completedChallengeHabits.has(habitId)) {
+        console.log('Este hábito ya ha sido completado hoy.');
+        return;
+      }
+    
+      try {
+        // Recuperar el perfil del usuario de AsyncStorage
+        const userProfileString = await AsyncStorage.getItem('userProfile');
+        if (!userProfileString) return;
+    
+        let userProfile = JSON.parse(userProfileString);
+    
+        // Actualiza el campo lastCompletedDate del hábito específico dentro del reto activo
+        const activeChallengeIndex = userProfile.activeChallenges.findIndex(challenge => challenge.habits.some(habit => habit.id === habitId));
+        if (activeChallengeIndex !== -1) {
+          const habitIndex = userProfile.activeChallenges[activeChallengeIndex].habits.findIndex(habit => habit.id === habitId);
+          if (habitIndex !== -1) {
+            userProfile.activeChallenges[activeChallengeIndex].habits[habitIndex].lastCompletedDate = todayStr;
+          }
+        }
+    
+        // Guardar el userProfile actualizado en AsyncStorage
+        await AsyncStorage.setItem('userProfile', JSON.stringify(userProfile));
+    
+        // Actualizar los estados
+        setCompletedChallengeHabits(prev => new Set(prev).add(habitId)); // Añade el ID del hábito completado
+    
+        console.log('Hábito del reto completado con éxito.');
+      } catch (error) {
+        console.error('Error al completar el hábito del reto', error);
+      }
+    };
+    
+    
     
 
-    const handleDeleteHabit = async () => {
+    const handleDeleteHabit = async (habitId) => {
 
       try {
 
@@ -372,6 +449,15 @@ const MainScreen = ({navigation}) => {
             setUserProfile(profile); // Actualiza el perfil del usuario en el estado
             setHabits(profile.activeHabits); // Actualiza los hábitos activos en el estado
     
+            if (profile.activeChallenges && profile.activeChallenges.length > 0) {
+              const activeChallengeHabits = profile.activeChallenges[0].habits;
+              setChallengeHabits(activeChallengeHabits); // Configura los hábitos del reto activo
+            
+              const completedChallengeHabitsToday = new Set(activeChallengeHabits.filter(habit => habit.lastCompletedDate === todayStr).map(habit => habit.id));
+              setCompletedChallengeHabits(completedChallengeHabitsToday);
+
+            }
+
             const today = new Date();
             today.setHours(0, 0, 0, 0); // Normalizar la hora del día a medianoche
             // Antes: Establecer los hábitos completados para el día actual usando lastCompletedDate
@@ -436,10 +522,12 @@ const MainScreen = ({navigation}) => {
             <Text style={styles.monthText}>{year}</Text>
           </View>
         <View style={styles.iconContainer}>
-          <TouchableOpacity>
+          <TouchableOpacity onPress={() => navigation.navigate("StatsScreen")}>
             <Ionicons name="menu" size={30} color="white" style={{ marginRight: 20 }} />
-          </TouchableOpacity>  
-            <Ionicons name="settings" size={30} color="white" />
+          </TouchableOpacity> 
+          <TouchableOpacity onPress={() => navigation.navigate("SettingsScreen")}>
+          <Ionicons name="settings" size={30} color="white" />
+            </TouchableOpacity> 
           
         </View>
         </View>
@@ -458,12 +546,36 @@ const MainScreen = ({navigation}) => {
           );
         })}
       </View>
+
+
         <View style={styles.scoreContainer}>
+        {
+           viewMode === 'userHabits' ? (
           <ScoreCounter finalScore={userProfile.points}/>
+        ):(
+          <ChallengeScoreCounter 
+          finalScore={completedChallengeHabits.size} 
+          totalHabits={challengeHabits.length}
+          />
+        )
+        }
         </View>
+
+
       </View>
       <View >
-<View>
+  <View>
+      <View style={{ flexDirection: 'row', justifyContent: 'space-around', marginVertical: 5, backgroundColor: "#353535", borderRadius: 20, padding: 2, alignSelf: "center", width: "60%" }}>
+      <TouchableOpacity onPress={() => setViewMode('userHabits')} style={[styles.toggleButton, viewMode === 'userHabits' ? styles.selectedButton : styles.unselectedButton]}>
+        <Text style={[styles.toggleButtonText, viewMode === 'userHabits' ? styles.selectedButtonText : styles.unselectedButtonText]}>Diarios</Text>
+      </TouchableOpacity>
+      <TouchableOpacity onPress={() => setViewMode('challengeHabits')} style={[styles.toggleButton, viewMode === 'challengeHabits' ? styles.selectedButton : styles.unselectedButton]}>
+        <Text style={[styles.toggleButtonText, viewMode === 'challengeHabits' ? styles.selectedButtonText : styles.unselectedButtonText]}>Reto</Text>
+      </TouchableOpacity>
+    </View>
+
+  {
+    viewMode === 'userHabits' ? (
       <FlatList
           data={habits}
           renderItem={({ item }) => (
@@ -480,6 +592,25 @@ const MainScreen = ({navigation}) => {
           keyExtractor={(item) => item.id.toString()}
           contentContainerStyle={{paddingBottom: 50 }}
         />
+  ):(
+        <FlatList
+          data={challengeHabits}
+          renderItem={({ item }) => (
+              <HabitCard
+                title={item.name}
+                icon={item.icon}
+                duration={item.duration}
+                color={item.color}
+                onComplete={() => handleCompleteChallengeHabit(item.id)}
+                isCompleted={completedChallengeHabits.has(item.id)}
+                openInfo={() => handlePresentModalPress(item)}
+              />
+          )}
+          keyExtractor={(item) => item.id.toString()}
+          contentContainerStyle={{paddingBottom: 50 }}
+        />
+  )
+  }
 </View>
         </View>
 
@@ -574,6 +705,108 @@ const SubtaskItem = ({ subtask }) => {
 
 
 
+const ChallengeScoreCounter = ({ finalScore, totalHabits }) => {
+  const animatedValue = useRef(new Animated.Value(0)).current;
+  const [score, setScore] = useState('0'); // Estado para almacenar el valor del score como texto
+
+  useEffect(() => {
+    Animated.timing(animatedValue, {
+      toValue: finalScore,
+      duration: 2000,
+      easing: Easing.linear,
+      useNativeDriver: false, // Cambiado a false porque interpolamos a un string
+    }).start();
+
+    animatedValue.addListener((animation) => {
+      const value = Math.floor(animation.value).toString(); // Redondear hacia abajo y convertir a string
+      setScore(value); // Actualizar el estado con el valor animado actual
+    });
+
+    return () => animatedValue.removeAllListeners(); // Limpiar el listener cuando el componente se desmonte
+  }, [finalScore]);
+
+  return (
+    <Animated.Text style={styles.scoreText}>
+      {score}/{totalHabits}
+    </Animated.Text>
+  );
+};
+
+
+const checkAndUpdateStreak = (userProfile, today) => {
+  // Crea una copia profunda del userProfile para evitar mutaciones directas
+  let updatedProfile = JSON.parse(JSON.stringify(userProfile));
+
+  // Comprueba si todos los hábitos han sido completados hoy
+  const allHabitsCompletedToday = updatedProfile.activeHabits.every(habit => 
+    habit.lastCompletedDate === today
+  );
+
+  if (!updatedProfile.currentStreak) {
+     updatedProfile.currentStreak = {
+      count: 0,
+      startDate: null, 
+    }
+  }
+
+  if (allHabitsCompletedToday) {
+    if (!updatedProfile.currentStreak.startDate) {
+      updatedProfile.currentStreak.startDate = today;
+      updatedProfile.currentStreak.count = 1;
+    } else {
+      const yesterday = new Date(today);
+      yesterday.setDate(yesterday.getDate() - 1);
+      const yesterdayString = yesterday.toISOString().split('T')[0];
+
+      if (updatedProfile.currentStreak.startDate === yesterdayString ||
+          updatedProfile.currentStreak.count === 1) {
+        updatedProfile.currentStreak.count++;
+      } else {
+        updatedProfile.currentStreak.startDate = today;
+        updatedProfile.currentStreak.count = 1;
+      }
+    }
+  }
+
+  console.log(allHabitsCompletedToday ? "Se a actualizado la racha": "No se a actualizado la racha")
+
+  return updatedProfile;
+};
+
+const updateProductivity = (userProfile, today) => {
+  // Crea una copia profunda del userProfile para evitar mutaciones directas
+
+  console.log("Actualizando productividad...")
+  let updatedProfile = JSON.parse(JSON.stringify(userProfile));
+
+  if (!updatedProfile.productivity) {
+    updatedProfile.productivity = { current: 0, history: [] };
+  }
+
+  const totalPointsEarnedToday = updatedProfile.activeHabits.reduce((total, habit) => {
+    return total + (habit.lastCompletedDate === today ? habit.points : 0);
+  }, 0);
+  const totalPointsPossibleToday = updatedProfile.activeHabits.reduce((total, habit) => total + habit.points, 0);
+  const productivityPercentage = (totalPointsEarnedToday / totalPointsPossibleToday) * 100;
+
+  // Actualiza el registro histórico de productividad
+  const lastProductivityRecord = updatedProfile.productivity.history[updatedProfile.productivity.history.length - 1];
+  if (lastProductivityRecord && lastProductivityRecord.date === today) {
+    lastProductivityRecord.productivity = productivityPercentage;
+  } else {
+    updatedProfile.productivity.history.push({
+      date: today,
+      productivity: productivityPercentage
+    });
+  }
+
+  // Actualiza la productividad actual
+  updatedProfile.productivity.current = productivityPercentage;
+
+  console.log("Se a actualizado la productividad a", productivityPercentage)
+
+  return updatedProfile;
+};
 
 
 
