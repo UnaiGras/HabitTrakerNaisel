@@ -16,7 +16,8 @@ import { AnimatedCircularProgress } from 'react-native-circular-progress';
 const StatsScreen = () => {
     
   const [userProfile, setUserProfile] = useState(null);
-  const daysOfWeek = ['SU', 'MO', 'TU', 'WE', 'TH', 'FR', 'SA'];
+  const [selectedSection, setSelectedSection] = useState('streaks');
+  const daysOfWeek = ['DO', 'LU', 'MA', 'MI', 'JU', 'VI', 'SA'];
 
   useEffect(() => {
     const fetchUserProfileAndTrackHabits = async () => {
@@ -55,7 +56,7 @@ const StatsScreen = () => {
     if (!userProfile.achievements || userProfile.achievements.length === 0) {
       return (
         <View style={styles.noAchievementsContainer}>
-          <Ionicons name="trophy" size={50} color="#white" />
+          <Ionicons name="star" size={60} color="gray" style={{marginVertical: 10}} />
           <Text style={styles.noAchievementsText}>Aún no tienes logros</Text>
         </View>
       );
@@ -79,15 +80,29 @@ const StatsScreen = () => {
         </TouchableOpacity>
       </View>
 
+      <View style={styles.buttonsContainer}>
+        <TouchableOpacity
+          onPress={() => setSelectedSection('streaks')}
+          style={[styles.button, selectedSection === 'streaks' ? styles.buttonSelected : null]}
+        >
+          <Text style={styles.buttonText}>Racha</Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          onPress={() => setSelectedSection('productivity')}
+          style={[styles.button, selectedSection === 'productivity' ? styles.buttonSelected : null]}
+        >
+          <Text style={styles.buttonText}>Productividad</Text>
+        </TouchableOpacity>
+      </View>
+      {selectedSection === 'streaks' ? (
       <View style={styles.streaksSection}>
-        <Text style={styles.streaksTitle}>Streaks</Text>
+        <Text style={styles.streaksTitle}>Racha</Text>
 
         <View style={styles.currentStreakContainer}>
-          <Ionicons name="trophy" size={170} color="gray" style={styles.trophyIconBehind} />
+          <Ionicons name="flame" size={200} color="gray" style={styles.trophyIconBehind} />
           <Text style={styles.currentStreak}>{userProfile.currentStreak.count}</Text>
-          <Text style={styles.currentStreakLabel}>Días</Text>
         </View>
-        
+        <Text style={styles.currentStreakLabel}>Días</Text>
         <View style={styles.weekContainer}>
           {daysOfWeek.map((day, index) => (
             <View key={day} style={[
@@ -101,52 +116,80 @@ const StatsScreen = () => {
         </View>
         
         <Text style={styles.streaksSubtitle}>
-          Complete all your habits for today to start a streak.
+          Completa todos los habitos de el dia para continuar con tu racha.
         </Text>
         
-        <Text style={styles.nextStreak}>1 day until next 🔥</Text>
+        <Text style={styles.nextStreak}>1 dia para la siguiente 🔥</Text>
+        <View style={{alignItems: "center", justifyContent: "center", padding: 10, marginVertical: 20, backgroundColor: "#353535", borderRadius: 12}}>
+        {renderAchievements()}
+        </View>
       </View>
+      ):(
+<View style={styles.productivityCard}>
+  <Text style={styles.cardTitle}>Productividad</Text>
+  <View style={styles.circularProgressContainer}>
+    <AnimatedCircularProgress
+      size={220}
+      width={30}
+      fill={userProfile.productivity.current}
+      tintColor="#9b59b6"
+      backgroundColor="#414952"
+    >
+      {fill => <Text style={styles.progressText}>{`${Math.round(fill)}%`}</Text>}
+    </AnimatedCircularProgress>
+  </View>
 
-      <AnimatedCircularProgress
-          size={120}
-          width={15}
-          fill={userProfile.productivity.current}
-          tintColor="#9b59b6"
-          backgroundColor="#3d5875"
-        >
-          {fill => <Text style={styles.progressText}>{`${Math.round(fill)}%`}</Text>}
-        </AnimatedCircularProgress>
+  <View style={styles.adviceCard}>
+  <Ionicons
+    name={userProfile.productivity.current === 100 ? "happy" : "information-circle-outline"}
+    size={44}
+    color="gray"
+    style={styles.adviceIcon}
+  />
+  <Text style={styles.adviceText}>
+    {userProfile.productivity.current === 100
+      ? "¡Felicidades! Has alcanzado el 100% de productividad. ¡Sigue así!"
+      : "Estás haciendo un gran esfuerzo. Sigue trabajando para alcanzar el 100% de productividad."}
+  </Text>
+</View>
 
-        <LineChart
-            data={{
-              labels: userProfile.productivity.history.map((h) => h.date),
-              datasets: [{ data: userProfile.productivity.history.map((h) => h.productivity) }]
-            }}
-            width={Dimensions.get('window').width - 16}
-            height={200}
-            yAxisLabel="%"
-            chartConfig={{
-              backgroundColor: '#202020',
-              backgroundGradientFrom: '#202020',
-              backgroundGradientTo: '#202020',
-              decimalPlaces: 0,
-              color: (opacity = 1) => `rgba(255, 255, 255, ${opacity})`,
-              labelColor: (opacity = 1) => `rgba(255, 255, 255, ${opacity})`,
-              style: {
-                borderRadius: 16
-              },
-              propsForDots: {
-                r: '6',
-                strokeWidth: '2',
-                stroke: '#ffa726'
-              }
-            }}
-            bezier
-            style={{
-              marginVertical: 8,
-              borderRadius: 16
-            }}
-            />
+
+  <View style={styles.chartContainer}>
+    <LineChart
+      data={{
+        labels: userProfile.productivity.history.map((h) => h.date),
+        datasets: [{ data: userProfile.productivity.history.map((h) => h.productivity) }]
+      }}
+      width={Dimensions.get('window').width - 32} // Ajuste para el padding
+      height={200}
+      yAxisLabel="%"
+      chartConfig={{
+        backgroundColor: '#a565f2',
+        backgroundGradientFrom: '#353535',
+        backgroundGradientTo: '#353535',
+        decimalPlaces: 1,
+        color: (opacity = 1) => `rgba(164, 101, 242, ${opacity})`,
+        labelColor: (opacity = 1) => `rgba(255, 255, 255, ${opacity})`,
+        style: {
+          borderRadius: 16
+        },
+        propsForDots: {
+          r: '6',
+          strokeWidth: '3',
+          stroke: '#a565f2'
+        }
+      }}
+      bezier
+      style={{
+        marginVertical: 8,
+        borderRadius: 16,
+        alignSelf: "center",
+      }}
+    />
+  </View>
+</View>
+
+      )}
 
     </ScrollView>
   );
@@ -179,17 +222,18 @@ const styles = StyleSheet.create({
       // Estilos para el icono del encabezado (ajustes)
     },
     streaksSection: {
-        backgroundColor: '#1A1A1A',
+        backgroundColor: '#252525',
         padding: 20,
         borderRadius: 10,
         marginHorizontal: 20,
         marginTop: 20,
       },
       streaksTitle: {
-        color: '#ffffff',
+        color: 'white',
         fontSize: 24,
         fontWeight: 'bold',
         marginBottom: 20,
+        fontStyle: "italic"
       },
       weekContainer: {
         flexDirection: 'row',
@@ -228,11 +272,12 @@ const styles = StyleSheet.create({
         marginVertical: 30
       },
       trophyIconBehind: {
-        position: 'absolute',
+        position: "absolute",
         opacity: 0.5, // Haz que el trofeo sea más sutil y no distraiga del número
+
       },
       currentStreak: {
-        fontSize: 104, // Tamaño de fuente grande para el número de la racha
+        fontSize: 84, // Tamaño de fuente grande para el número de la racha
         fontWeight: 'bold',
         color: 'white', // Color que resalta para la cantidad de días
         zIndex: 1, // Asegúrate de que el texto se muestre por encima del icono
@@ -242,7 +287,97 @@ const styles = StyleSheet.create({
         fontSize: 24,
         color: '#ffffff',
         fontWeight: '600', // Ajusta según sea necesario para alinear con el diseño
+        alignSelf: "center",
+        marginBottom: 30
       },
+      buttonsContainer: {
+        flexDirection: 'row',
+        justifyContent: 'space-around', 
+        marginVertical: 5,
+        backgroundColor: "#353535", 
+        borderRadius: 20, 
+        padding: 2, 
+        alignSelf: "center", 
+        width: "70%"
+      },
+
+      button: {
+        width: "50%",
+        padding: 3,
+        borderRadius: 20
+      },
+      buttonText: {
+        color: "white",
+        alignSelf: "center",
+        fontSize: 16,
+        fontWeight: "500",
+        padding: 5
+      },
+      buttonSelected: {
+        backgroundColor: "#191919",
+      },
+      productivityCard: {
+        backgroundColor: '#252525', // Fondo blanco para la tarjeta
+        borderRadius: 20, // Bordes redondeados
+        shadowColor: '#000', // Sombra para dar profundidad
+        shadowOffset: {
+          width: 0,
+          height: 2,
+        },
+        shadowOpacity: 0.25,
+        shadowRadius: 3.84,
+        elevation: 5, // Elevación para Android
+        padding: 16, // Padding interno
+        marginHorizontal: 16, // Margen horizontal para no pegar al borde de la pantalla
+        marginTop: 16, // Margen superior para separar de otros elementos
+      },
+      cardTitle: {
+        fontSize: 24, // Tamaño de fuente para el título
+        fontWeight: 'bold', // Fuente en negrita
+        marginBottom: 16, // Margen inferior para separar del contenido
+        textAlign: 'center', // Centrar el título
+        color: "white",
+        fontStyle: "italic",
+        alignSelf: "flex-start"
+      },
+      circularProgressContainer: {
+        alignItems: 'center', // Centrar el círculo de progreso
+        marginVertical: 20, // Margen inferior para separar de la gráfica
+      },
+      progressText: {
+        position: 'absolute', // Posicionar sobre el círculo de progreso
+        fontSize: 25, // Tamaño de la fuente para el porcentaje
+        fontWeight: 'bold', // Fuente en negrita
+        color: "white"
+      },
+      chartContainer: {
+        // Contenedor para la gráfica (opcionalmente para ajustes adicionales)
+      },
+      adviceCard: {
+        flexDirection: 'row', // Alinea ícono y texto horizontalmente
+        backgroundColor: '#555', // Fondo gris para la tarjeta
+        padding: 15, // Padding general para el contenido interno
+        borderRadius: 10, // Bordes redondeados
+        alignItems: 'center', // Alinea los elementos verticalmente
+        margin: 10, // Margen externo para separación
+      },
+      adviceIcon: {
+        marginRight: 10, // Espacio entre el ícono y el texto
+      },
+      adviceText: {
+        flex: 1, // Asegura que el texto ocupe el espacio restante
+        fontSize: 16, // Tamaño de fuente para el mensaje
+        color: "white",
+        fontWeight:"700"
+      },
+      noAchievementsContainer: {
+        alignItems: "center"
+      },
+      noAchievementsText: {
+        color: "gray",
+        fontSize: 17,
+        fontWeight: "700"
+      }
     // Más estilos para otros componentes, siguiendo la misma paleta de colores y dimensiones
   });
   
