@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, {useRef, useEffect}from 'react';
 import { View, Text, StyleSheet, Image, ScrollView } from 'react-native';
 import milestones from '../../../milestones'; // Asegúrate de que la ruta es correcta
 
@@ -10,11 +10,23 @@ const imageMap = {
   'griego.png': require('../../../assets/griego.png'),
 };
 const ProgressBar = ({ userPoints }) => {
+  const scrollViewRef = useRef();
   // Ordena milestones de mayor a menor puntuación
   const sortedMilestones = [...milestones].sort((a, b) => b.points - a.points);
 
+  useEffect(() => {
+    // Espera un breve momento después de montar para asegurar la medición correcta
+    const timer = setTimeout(() => {
+      scrollViewRef.current?.scrollToEnd({ animated: true });
+    }, 100); // Puede ajustar este tiempo si es necesario
+
+    return () => clearTimeout(timer);
+  }, []);
+
   return (
-    <ScrollView contentContainerStyle={{ alignItems: 'center', paddingVertical: 20 }}>
+    <ScrollView 
+    ref={scrollViewRef}
+    contentContainerStyle={{ alignItems: 'center', paddingVertical: 20 }}>
       {sortedMilestones.map((milestone, index) => {
         let progress = 0;
         // Verifica si este hito es el actual en progreso

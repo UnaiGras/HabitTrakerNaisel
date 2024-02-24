@@ -13,6 +13,7 @@ import SettingsScreen from "./components/src/settings/SettingsScreen";
 import ChatScreen from "./components/src/Talk/ChatScreen";
 import TimerScreen from "./components/src/General/TimerScreen";
 import StatsScreen from "./components/src/stats/StatsScreen";
+import PlansScreen from "./components/src/settings/PlanScreen";
 
 
 const Stack = createStackNavigator();
@@ -138,6 +139,19 @@ export default function Navigation({ userProfileExists }) { // Recibe userProfil
                         <Stack.Screen
                             name="StatsScreen"
                             component={StatsScreen}
+                            options={{
+                                headerStyle: {
+                                    backgroundColor: '#151515',
+                                    shadowColor: "#191919",
+                                },
+                                headerTitleStyle: {
+                                    color: "white"
+                                }
+                            }}
+                        />
+                        <Stack.Screen
+                            name="PlansScreen"
+                            component={PlansScreen}
                             options={{
                                 headerStyle: {
                                     backgroundColor: '#151515',

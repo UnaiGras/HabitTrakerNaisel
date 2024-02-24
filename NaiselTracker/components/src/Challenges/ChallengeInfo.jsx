@@ -88,6 +88,7 @@ const ChallengeDetails = ({ navigation, route }) => {
             />
           )}
           keyExtractor={(item) => `habit-${item.id}`}
+          ListFooterComponent={<View style={{ height: 600 }} />}
         />
         <TouchableOpacity style={styles.finishButton} onPress={() => addUserChallenge(challenge)}>
               <Text style={styles.buttonText}>Aceptar Reto</Text>

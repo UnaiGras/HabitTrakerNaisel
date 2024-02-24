@@ -7,7 +7,7 @@ const challenges = [{
     id: 28398,
     title: "Una Vida Saludable En 1 Mes",
     desc: "Los cientificos han demostrado que con solo 30 min al dia se pueden conseguir muy buenos resultados en cuanto a la mejora de el estado de animo y estado fisico",
-    image: "leaf",
+    image: require("../../../assets/excursionismo.png"),
     pts: 550,
     days: 31,
     habits: 

@@ -74,7 +74,7 @@ const StatsScreen = () => {
   return (
     <ScrollView style={styles.container}>
       <View style={styles.headerContainer}>
-        <Text style={styles.headerTitle}>Statistics</Text>
+        <Text style={styles.headerTitle}>Estadisticas</Text>
         <TouchableOpacity style={styles.headerIcon}>
           <Ionicons name="settings" size={24} color="#ffffff" />
         </TouchableOpacity>

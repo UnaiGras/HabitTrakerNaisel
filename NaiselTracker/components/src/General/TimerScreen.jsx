@@ -1,13 +1,42 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Alert } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { AnimatedCircularProgress } from 'react-native-circular-progress';
+import * as Notifications from 'expo-notifications';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const TimerScreen = ({ route }) => {
-  const { minutes, color, iconName, title } = route.params;
+  const { minutes, color, iconName, title, id } = route.params; // Asegúrate de pasar un `id` único para cada hábito
   const [time, setTime] = useState(minutes * 60);
   const [isActive, setIsActive] = useState(false);
   const totalDuration = minutes * 60;
+
+  // Usamos el id del hábito para crear claves únicas para AsyncStorage
+  const startTimeKey = `startTime_${id}`;
+  const durationKey = `duration_${id}`;
+
+  useEffect(() => {
+    const checkTime = async () => {
+      const startTime = await AsyncStorage.getItem(startTimeKey);
+      const duration = await AsyncStorage.getItem(durationKey);
+      if (startTime && duration) {
+        const now = new Date().getTime();
+        const elapsed = now - parseInt(startTime);
+        const totalTime = parseInt(duration) * 60 * 1000; // Convertir a milisegundos
+        if (elapsed < totalTime) {
+          setTime(Math.floor((totalTime - elapsed) / 1000)); // Actualizar tiempo con segundos restantes
+          setIsActive(true);
+        } else {
+          // Manejar cronómetro expirado
+          setTime(0);
+          setIsActive(false);
+          Alert.alert("Cronómetro finalizado", "El tiempo para tu actividad ha terminado.");
+        }
+      }
+    };
+
+    checkTime();
+  }, [id]); // Asegúrate de incluir el id en el array de dependencias
 
   useEffect(() => {
     let interval = null;
@@ -22,8 +51,24 @@ const TimerScreen = ({ route }) => {
     return () => clearInterval(interval);
   }, [isActive, time]);
 
-  const toggleTimer = () => {
+  const toggleTimer = async () => {
+    if (!isActive) {
+      const now = new Date().getTime();
+      await AsyncStorage.setItem(startTimeKey, now.toString());
+      await AsyncStorage.setItem(durationKey, minutes.toString());
+      scheduleNotification();
+    }
     setIsActive(!isActive);
+  };
+
+  const scheduleNotification = async () => {
+    await Notifications.scheduleNotificationAsync({
+      content: {
+        title: "¡Tiempo Finalizado!",
+        body: `Tu tiempo para ${title} ha terminado.`,
+      },
+      trigger: { seconds: time },
+    });
   };
 
   const formatTime = () => {
@@ -36,9 +81,9 @@ const TimerScreen = ({ route }) => {
     <View style={styles.container}>
       <View style={{alignItems: "center"}}>
         <View style={{backgroundColor: "#353535", padding: 20, borderRadius: 20, marginVertical: 20}}>
-      <Ionicons name={iconName} size={68} color={color} />
-      </View>
-      <Text style={styles.title}>{title}</Text>
+          <Ionicons name={iconName} size={68} color={color} />
+        </View>
+        <Text style={styles.title}>{title}</Text>
       </View>
       <AnimatedCircularProgress
         size={300}

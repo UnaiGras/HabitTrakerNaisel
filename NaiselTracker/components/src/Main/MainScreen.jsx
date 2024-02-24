@@ -19,6 +19,11 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import MilestoneCard from './MileStoneCard';
 import { BottomSheetModal, BottomSheetModalProvider } from '@gorhom/bottom-sheet';
 import { useIsFocused } from '@react-navigation/native';
+import { Audio } from 'expo-av';
+import * as Notifications from 'expo-notifications';
+import { achivements as definedAchievements} from '../../../achivements';
+
+
 
 const styles = StyleSheet.create({
   headerContainer: {
@@ -275,7 +280,9 @@ const MainScreen = ({navigation}) => {
     const [habits, setHabits] = useState([]);
     const [selectedHabit, setSelectedHabit] = useState(null);
     const [viewMode, setViewMode] = useState('userHabits'); // 'userHabits' o 'challengeHabits'
-    
+    const [sounds, setSounds] = useState({});
+
+
     const [challengeHabits, setChallengeHabits] = useState([]);
     const [completedChallengeHabits, setCompletedChallengeHabits] = useState(new Set());
     
@@ -291,10 +298,28 @@ const MainScreen = ({navigation}) => {
     const currentDayIndex = new Date().getDay();
     const adjustedIndex = currentDayIndex === 0 ? 6 : currentDayIndex - 1;
 
+
     const handlePresentModalPress = useCallback((habit) => {
       setSelectedHabit(habit);
       bottomSheetModalRef.current?.present();
     }, []);
+
+    async function loadSounds() {
+      const soundFiles = {
+        habitCompleted: require("../../../assets/audios/completedHabit.wav"),
+        increasePoints: require("../../../assets/audios/3sPointsCount.wav"),
+        challengeHabitCompleted: require("../../../assets/audios/bonus.wav")
+
+      };
+  
+      const soundObjects = {};
+      for (const key in soundFiles) {
+        const { sound } = await Audio.Sound.createAsync(soundFiles[key]);
+        soundObjects[key] = sound;
+      }
+  
+      setSounds(soundObjects);
+    }
 
     const updatePointsAndCheckMilestones = async (pointsToAdd) => {
       try {
@@ -364,6 +389,15 @@ const MainScreen = ({navigation}) => {
           // Guarda el userProfile actualizado en AsyncStorage
           await AsyncStorage.setItem('userProfile', JSON.stringify(updatedUserProfile));
           setCompletedHabits(prev => new Set(prev).add(habitId)); // Actualiza el estado de los hábitos completados
+
+          if (sounds && sounds.habitCompleted) {
+            await sounds.habitCompleted.stopAsync();
+            await sounds.habitCompleted.setPositionAsync(0);
+            await sounds.habitCompleted.playAsync();
+          }
+          
+          
+
         }
       } catch (error) {
         console.error('Error al completar el hábito', error);
@@ -400,8 +434,17 @@ const MainScreen = ({navigation}) => {
     
         // Actualizar los estados
         setCompletedChallengeHabits(prev => new Set(prev).add(habitId)); // Añade el ID del hábito completado
+
+        if (sounds && sounds.challengeHabitCompleted) {
+          await sounds.challengeHabitCompleted.stopAsync();
+          await sounds.challengeHabitCompleted.setPositionAsync(0);
+          await sounds.challengeHabitCompleted.playAsync();
+        }
     
         console.log('Hábito del reto completado con éxito.');
+
+
+      
       } catch (error) {
         console.error('Error al completar el hábito del reto', error);
       }
@@ -437,6 +480,20 @@ const MainScreen = ({navigation}) => {
         console.error('Error al borrar el hábito', error);
       }
     };
+
+    useEffect(() => {
+      // Lógica para cargar sonidos
+      loadSounds();
+    
+      // Función de limpieza para descargar los sonidos
+      return () => {
+        Object.values(sounds).forEach(sound => {
+          if (sound) {
+            sound.unloadAsync();
+          }
+        });
+      };
+    }, []);
     
     
     useEffect(() => {
@@ -445,26 +502,29 @@ const MainScreen = ({navigation}) => {
           const storedUserProfile = await AsyncStorage.getItem('userProfile');
           if (storedUserProfile !== null) {
             const profile = JSON.parse(storedUserProfile);
-            console.log("Estos son los puntos del usuario", profile.points);
+            console.log(profile);
             setUserProfile(profile); // Actualiza el perfil del usuario en el estado
             setHabits(profile.activeHabits); // Actualiza los hábitos activos en el estado
+
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
     
+            const todayStr = new Date().toISOString().split('T')[0]
+
             if (profile.activeChallenges && profile.activeChallenges.length > 0) {
               const activeChallengeHabits = profile.activeChallenges[0].habits;
-              setChallengeHabits(activeChallengeHabits); // Configura los hábitos del reto activo
-            
-              const completedChallengeHabitsToday = new Set(activeChallengeHabits.filter(habit => habit.lastCompletedDate === todayStr).map(habit => habit.id));
+              setChallengeHabits(activeChallengeHabits);
+               // Configura los hábitos del reto activo
+
+              const completedChallengeHabitsToday = new Set(
+                activeChallengeHabits.filter(habit => habit.lastCompletedDate === todayStr).map(habit => habit.id)
+              );
               setCompletedChallengeHabits(completedChallengeHabitsToday);
 
             }
-
-            const today = new Date();
-            today.setHours(0, 0, 0, 0); // Normalizar la hora del día a medianoche
-            // Antes: Establecer los hábitos completados para el día actual usando lastCompletedDate
-            // (Este bloque se debe modificar o eliminar si decides basarte completamente en dailyHabitTracking)
                       
             // Después: Usa dailyHabitTracking para establecer los hábitos completados
-            const todayStr = new Date().toISOString().split('T')[0]; // Formato: 'YYYY-MM-DD'
+            ; // Formato: 'YYYY-MM-DD'
             const completedIds = new Set(profile.dailyHabitTracking[todayStr] || []);
             setCompletedHabits(completedIds); // Actualiza los hábitos completados hoy en el estado
 
@@ -487,6 +547,8 @@ const MainScreen = ({navigation}) => {
             }
     
             setDaysCompletedAllHabits(daysCompletedAllHabits); // Asume que tienes un estado para esto
+
+            await ensureNotificationPermissions()
           }
         } catch (error) {
           console.error('Error al recuperar el perfil del usuario', error);
@@ -523,7 +585,7 @@ const MainScreen = ({navigation}) => {
           </View>
         <View style={styles.iconContainer}>
           <TouchableOpacity onPress={() => navigation.navigate("StatsScreen")}>
-            <Ionicons name="menu" size={30} color="white" style={{ marginRight: 20 }} />
+            <Ionicons name="stats-chart" size={30} color="white" style={{ marginRight: 20 }} />
           </TouchableOpacity> 
           <TouchableOpacity onPress={() => navigation.navigate("SettingsScreen")}>
           <Ionicons name="settings" size={30} color="white" />
@@ -551,7 +613,7 @@ const MainScreen = ({navigation}) => {
         <View style={styles.scoreContainer}>
         {
            viewMode === 'userHabits' ? (
-          <ScoreCounter finalScore={userProfile.points}/>
+          <ScoreCounter finalScore={userProfile.points} increasePointsSound={sounds.increasePoints}/>
         ):(
           <ChallengeScoreCounter 
           finalScore={completedChallengeHabits.size} 
@@ -591,6 +653,7 @@ const MainScreen = ({navigation}) => {
           )}
           keyExtractor={(item) => item.id.toString()}
           contentContainerStyle={{paddingBottom: 50 }}
+          ListFooterComponent={<View style={{ height: 600 }} />}
         />
   ):(
         <FlatList
@@ -608,6 +671,7 @@ const MainScreen = ({navigation}) => {
           )}
           keyExtractor={(item) => item.id.toString()}
           contentContainerStyle={{paddingBottom: 50 }}
+          ListFooterComponent={<View style={{ height: 600 }} />}
         />
   )
   }
@@ -661,14 +725,31 @@ const MainScreen = ({navigation}) => {
   );
 };
 
-const ScoreCounter = ({ finalScore }) => {
+const ScoreCounter = ({ finalScore, increasePointsSound }) => {
   const animatedValue = useRef(new Animated.Value(0)).current;
   const [score, setScore] = useState('0'); // Estado para almacenar el valor del score como texto
 
   useEffect(() => {
+
+    const playIncreasePointsSound = async () => {
+      if (increasePointsSound) {
+        await increasePointsSound.playAsync();
+        // Asegurarse de que el sonido empieza desde el principio si se va a reproducir múltiples veces
+        increasePointsSound.setOnPlaybackStatusUpdate(async (status) => {
+          if (status.didJustFinish) {
+            await increasePointsSound.setPositionAsync(0);
+            await increasePointsSound.stopAsync();
+          }
+        });
+      }
+    };
+
+    playIncreasePointsSound();
+
+
     Animated.timing(animatedValue, {
       toValue: finalScore,
-      duration: 2000,
+      duration: 3000,
       easing: Easing.linear,
       useNativeDriver: false, // Cambiado a false porque interpolamos a un string
     }).start();
@@ -766,6 +847,19 @@ const checkAndUpdateStreak = (userProfile, today) => {
         updatedProfile.currentStreak.count = 1;
       }
     }
+
+    definedAchievements.streak.forEach(achievement => {
+      const alreadyEarned = updatedProfile.achievements.some(a => a.name === achievement.name);
+      if (!alreadyEarned && updatedProfile.currentStreak.count >= achievement.milestone) {
+        updatedProfile.achievements.push({
+          name: achievement.name,
+          description: achievement.description,
+          streak: achievement.milestone,
+          icon: achievement.image, // Asumiendo que 'image' puede usarse como 'icon' aquí
+          color: '#FFD700', // O cualquier lógica para asignar colores
+        });
+      }
+    });
   }
 
   console.log(allHabitsCompletedToday ? "Se a actualizado la racha": "No se a actualizado la racha")
@@ -807,6 +901,47 @@ const updateProductivity = (userProfile, today) => {
 
   return updatedProfile;
 };
+
+async function ensureNotificationPermissions() {
+
+  const { status: existingStatus } = await Notifications.getPermissionsAsync();
+
+  let granted = false; 
+
+
+  if (existingStatus === 'granted') {
+    console.log('Notification permissions already granted.');
+    granted = true;
+  } else {
+
+    const { status } = await Notifications.requestPermissionsAsync();
+    if (status === 'granted') {
+      console.log('Notification permissions granted.');
+      granted = true;
+    } else {
+      console.log('Notification permissions denied.');
+      granted = false;
+    }
+  }
+
+
+  try {
+    const userProfileStr = await AsyncStorage.getItem('userProfile');
+    if (userProfileStr) {
+      const userProfile = JSON.parse(userProfileStr);
+
+
+      userProfile.activatedNotifications = granted;
+
+
+      await AsyncStorage.setItem('userProfile', JSON.stringify(userProfile));
+      console.log('userProfile updated with notification permission status.');
+    }
+  } catch (error) {
+    console.error('Error updating userProfile with notification permission status:', error);
+  }
+}
+
 
 
 

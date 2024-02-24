@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import {
   View,
   Text,
@@ -19,48 +19,71 @@ import { useNavigation, useRoute } from '@react-navigation/native';
 const ChatScreen = () => {
   const navigation = useNavigation();
   const route = useRoute();
-  const { name, desc, image, context, pts } = route.params; // Asumiendo que estos datos vienen como parámetros
+
+  const flatListRef = useRef();
+  console.log("deberia moverse para abajo")
+
+  const { name, desc, image, context } = route.params; // Asumiendo que estos datos vienen como parámetros
   const [messages, setMessages] = useState([]);
   const [message, setMessage] = useState('');
 
   const sendMessage = async () => {
     if (message.trim() === '') return;
-    
+  
+    // Preparar el mensaje del usuario
     const userMessage = {
-        id: Date.now(),
-        text: message,
-        sender: 'user'
+      id: Date.now(),
+      text: message,
+      sender: 'user'
     };
-    setMessages([...messages, userMessage]);
+    // Añadir el mensaje del usuario al estado
+    setMessages(currentMessages => [...currentMessages, userMessage]);
     setMessage('');
-
+    setTimeout(() => {
+      if (flatListRef.current) {
+        flatListRef.current.scrollToEnd({ animated: true });
+      }
+    }, 100);
+  
     try {
-        const response = await fetch('http://TU_SERVIDOR/api/chat', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-                messages: [
-                    // Aquí puedes incluir mensajes previos si es necesario
-                    { role: "user", content: message },
-                ]
-            }),
-        });
+      // Preparar los últimos 5 mensajes + el contexto como mensaje del sistema
+      const recentMessages = messages.slice(-5).map(msg => ({
+        role: msg.sender === 'user' ? 'user' : 'assistant',
+        content: msg.text
+      }));
+  
+      // Añadir el mensaje del sistema como el contexto al inicio
+      const systemMessage = { role: "system", content: context };
+  
+      const response = await fetch('http://192.168.1.19:3000/chat', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          messages: [
+            systemMessage,
+            ...recentMessages,
+            { role: "user", content: message }, // El mensaje actual del usuario
+          ]
+        }),
+      });
+  
+      const data = await response.json();
 
-        const data = await response.json();
-
-        // Asume que la respuesta de OpenAI es directamente el texto a mostrar
-        const responseMessage = {
-            id: Date.now() + 1,
-            text: data.choices[0].message.content,
-            sender: 'bot'
-        };
-        setMessages(currentMessages => [...currentMessages, responseMessage]);
+      console.log(data)
+      // Añadir la respuesta del asistente al estado
+      const responseMessage = {
+        id: Date.now() + 1,
+        text: data.message, // Asegúrate de acceder a la propiedad correcta
+        sender: 'assistant'
+      };
+      setMessages(currentMessages => [...currentMessages, responseMessage]);
     } catch (error) {
-        console.error('Error al enviar el mensaje:', error);
+      console.error('Error al enviar el mensaje:', error);
     }
-};
+  };
+  
 
 
   return (
@@ -78,22 +101,30 @@ const ChatScreen = () => {
         <Text style={styles.headerText}>{name}</Text>
       </View>
       <FlatList
+      ref={flatListRef}
         data={messages}
         keyExtractor={item => item.id.toString()}
         renderItem={({ item }) => (
-          <View style={[styles.message, item.sender === 'user' && styles.userMessage]}>
+          <View style={[styles.message, item.sender === 'user' ? styles.userMessage : styles.botMessage]}>
             <Text style={styles.messageText}>{item.text}</Text>
           </View>
         )}
+        ListHeaderComponent={
+          <View style={styles.cardContainer}>
+            <Image source={image} style={styles.cardImage} />
+            <Text style={styles.cardName}>{name}</Text>
+            <Text style={styles.cardDesc}>{desc}</Text>
+          </View>
+        }
         style={styles.messagesList}
       />
       <View style={styles.inputContainer}>
       <TextInput
-                    style={styles.input}
-                    value={message}
-                    onChangeText={setMessage}
-                    placeholder="Escribe un mensaje..."
-                    placeholderTextColor="#666"
+          style={styles.input}
+          value={message}
+          onChangeText={setMessage}
+          placeholder="Escribe un mensaje..."
+          placeholderTextColor="#666"
                 />
         <TouchableOpacity onPress={sendMessage}>
           <Ionicons name="send" size={24} color="#a565f2"/>
@@ -133,18 +164,25 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   message: {
-    margin: 10,
+    margin: 20,
     padding: 10,
     borderRadius: 10,
     backgroundColor: '#575757',
     alignSelf: 'flex-start',
+    maxWidth: "60%"
   },
   userMessage: {
     alignSelf: 'flex-end',
     backgroundColor: '#4A90E2',
   },
+  botMessage: {
+    alignSelf: 'flex-start',
+    backgroundColor: 'gray',
+  },
   messageText: {
     color: 'white',
+    fontSize: 16,
+    fontWeight: "600"
   },
   inputContainer: {
     flexDirection: 'row',
@@ -160,6 +198,37 @@ const styles = StyleSheet.create({
     color: 'white',
     borderRadius: 20,
     padding: 10,
+  },
+  cardContainer: {
+    alignItems: 'center', // Centra los elementos horizontalmente en el contenedor
+    padding: 10,
+    alignSelf: "center",
+    backgroundColor: "#252525",
+    marginVertical: 100,
+    borderRadius: 20,
+    shadowColor: '#8A2BE2', // Color de la sombra lila
+      shadowOffset: { width: 0, height: 4 }, // Desplazamiento de la sombra
+      shadowOpacity: 0.3, // Opacidad de la sombra
+      shadowRadius: 5, // Radio de desenfoque de la sombra
+      elevation: 8,
+  },
+  cardImage: {
+    width: 150, // Ancho de la imagen
+    height: 150, // Alto de la imagen
+    borderRadius: 50, // Redondea las esquinas para hacerla circular
+  },
+  cardName: {
+    fontSize: 18, // Tamaño de fuente para el nombre
+    fontWeight: 'bold', // Negrita para el nombre
+    marginTop: 8, // Margen arriba del nombre
+    color: "white"
+  },
+  cardDesc: {
+    fontSize: 14, // Tamaño de fuente para la descripción
+    color: '#888', // Color de la descripción
+    marginTop: 4, // Margen arriba de la descripción
+    textAlign: 'center', // Centra el texto de la descripción
+    maxWidth: "60%"
   },
 });
 
