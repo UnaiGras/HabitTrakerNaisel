@@ -4,10 +4,8 @@
   },
   "build": {
     "development": {
-      "distribution": "internal",
-      "android": {
-        "gradleCommand": ":app:assembleDebug"
-      }
+      "developmentClient": true,
+      "distribution": "internal"
     },
     "preview": {
       "distribution": "internal",

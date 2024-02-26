@@ -105,6 +105,11 @@ const SettingsScreen = ({navigation}) => {
         <Ionicons name="share-social" size={24} color="white" />
         <Text style={styles.settingText}>Compartir</Text>
       </TouchableOpacity>
+
+      <TouchableOpacity style={[styles.settingItem, styles.delete]} onPress={() => {navigation.navigate("PlansScreen")}}>
+        <Ionicons name="trash" size={24} color="#a565f2" />
+        <Text style={styles.settingText}>Borrar Cuenta</Text>
+      </TouchableOpacity>
     </View>
   );
 };
@@ -146,6 +151,10 @@ const styles = StyleSheet.create({
   subscription: {
     borderWidth: 0.3,
     borderColor: "#a565f2",
+  },
+  delete: {
+    borderWidth: 0.3,
+    borderColor: "red"
   }
 });
 

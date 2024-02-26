@@ -1,13 +1,28 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, createContext } from 'react';
 import { StatusBar } from 'expo-status-bar';
 import { StyleSheet, View, ActivityIndicator, AppState } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import Navigation from './navigation';
 import * as Notifications from "expo-notifications"
+import { ApolloClient, InMemoryCache, ApolloProvider } from '@apollo/client';
+import { createUploadLink } from "apollo-upload-client"
+
+export const AuthContext = createContext()
 
 export default function App() {
   const [loading, setLoading] = useState(true);
   const [userProfileExists, setUserProfileExists] = useState(false);
+  const [token, setUserToken] = useState('')
+  const [client, setClient] = useState(
+    new ApolloClient({
+    link: createUploadLink({
+      uri: 'http://192.168.0.13:4000/graphql',
+      headers: {
+        'authorization': `bearer `
+      }
+    }),
+    cache: new InMemoryCache(),
+  }))
 
   useEffect(() => {
     const checkUserProfile = async () => {
@@ -34,6 +49,20 @@ export default function App() {
       subscription.remove();
     };
   }, []);
+
+  useEffect(() => {
+    console.log("si esto sale es que funciona miperro", token)
+    setClient(
+      new ApolloClient({
+      link: createUploadLink({
+        uri: 'http://192.168.0.13:4000/graphql',
+        headers: {
+          'authorization': `bearer ${token}`
+        }
+      }),
+      cache: new InMemoryCache(),
+    }))
+  },[token])
 
   const scheduleHabitReminder = async () => {
     const userProfileStr = await AsyncStorage.getItem('userProfile');
@@ -65,10 +94,12 @@ export default function App() {
   }
 
   return (
+    <ApolloProvider client={client}>
     <View style={styles.container}>
       <Navigation userProfileExists={userProfileExists}/>
       <StatusBar style="auto" />
     </View>
+    </ApolloProvider>
   );
 }
 
