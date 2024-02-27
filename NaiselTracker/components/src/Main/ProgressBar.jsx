@@ -4,11 +4,20 @@ import { View, Text, StyleSheet, Image, ScrollView } from 'react-native';
 import milestones from '../../../milestones'; // Asegúrate de que la ruta es correcta
 
 const imageMap = {
+  'semilla.png': require('../../../assets/semilla.png'),
   'hormiga.png': require('../../../assets/hormiga.png'),
   'angel-santo.png': require('../../../assets/angel-santo.png'),
   'monje.png': require('../../../assets/monje.png'),
+  'leon.png': require('../../../assets/leon.png'),
+  'faraon.png': require('../../../assets/faraon.png'),
+  'samurai.png': require('../../../assets/samurai.png'),
+  'astronauta.png': require('../../../assets/astronauta.png'),
+  'titan.png': require('../../../assets/titan.png'),
+  'dragon.png': require('../../../assets/dragon.png'),
   'griego.png': require('../../../assets/griego.png'),
+  'dios.png': require('../../../assets/dios.png'),
 };
+
 const ProgressBar = ({ userPoints }) => {
   const scrollViewRef = useRef();
   // Ordena milestones de mayor a menor puntuación

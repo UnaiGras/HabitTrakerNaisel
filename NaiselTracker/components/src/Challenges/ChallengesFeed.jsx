@@ -149,11 +149,152 @@ const challenges = [{
           { id: 2, name: "Utilizar aplicaciones de meditación para guiar la respiración" }
         ]
       }
-    ]
+    ]},
+    {
+      id: 40001,
+      title: "Operación Bikini",
+      desc: "Programa de 2 meses para tonificar y eliminar grasa, mejorando la composición corporal.",
+      image: require("../../../assets/fitnesschallenge.png"),
+      pts: 1600,
+      days: 60,
+      habits: [
+        {
+          id: 30001,
+          name: "Ejercicio cardiovascular",
+          icon: "walk",
+          desc: "Realizar 30 minutos de ejercicio cardiovascular diario para aumentar la quema de calorías.",
+          duration: "30m",
+          points: 50,
+          color: "#f44336",
+          subTasks: []
+        },
+        {
+          id: 30002,
+          name: "Entrenamiento de fuerza",
+          icon: "fitness",
+          desc: "Incorporar rutinas de fuerza 4 veces a la semana para tonificar y construir músculo.",
+          duration: "1h",
+          points: 70,
+          color: "#9c27b0",
+          subTasks: []
+        },
+        {
+          id: 30003,
+          name: "Hidratación adecuada",
+          icon: "water",
+          desc: "Consumir al menos 2 litros de agua al día para apoyar la eliminación de toxinas y la hidratación.",
+          duration: "All day",
+          points: 20,
+          color: "#2196f3",
+          subTasks: []
+        },
+        {
+          id: 30004,
+          name: "Dieta balanceada",
+          icon: "restaurant",
+          desc: "Seguir una dieta equilibrada, rica en frutas, verduras y proteínas magras, evitando azúcares y grasas saturadas.",
+          duration: "All day",
+          points: 80,
+          color: "#4caf50",
+          subTasks: []
+        },
+        {
+          id: 30005,
+          name: "Descanso adecuado",
+          icon: "bed",
+          desc: "Asegurar 7-8 horas de sueño de calidad cada noche para favorecer la recuperación muscular y la regulación hormonal.",
+          duration: "8h",
+          points: 40,
+          color: "#673ab7",
+          subTasks: []
+        }
+      ]
+    },
+    {
+      id: 50001,
+      title: "Bienestar Mental",
+      desc: "Reto de 60 días para mejorar el bienestar mental y apoyar la recuperación de estados depresivos.",
+      image: require("../../../assets/mental-health.png"),
+      pts: 1600,
+      days: 60,
+      habits: [
+        {
+          id: 40001,
+          name: "Meditación diaria",
+          icon: "leaf",
+          desc: "Practicar meditación diaria para reducir el estrés y mejorar la concentración.",
+          duration: "15m",
+          points: 30,
+          color: "#4caf50",
+          subTasks: []
+        },
+        {
+          id: 40002,
+          name: "Actividad física regular",
+          icon: "bicycle",
+          desc: "Incluir al menos 30 minutos de actividad física moderada diariamente para mejorar el estado de ánimo.",
+          duration: "30m",
+          points: 50,
+          color: "#ff9800",
+          subTasks: []
+        },
+        {
+          id: 40003,
+          name: "Alimentación nutritiva",
+          icon: "nutrition",
+          desc: "Priorizar una dieta rica en nutrientes que beneficie la salud mental, incluyendo omega-3, frutas y vegetales.",
+          duration: "All day",
+          points: 100,
+          color: "#4caf50",
+          subTasks: []
+        },
+        {
+          id: 40004,
+          name: "Escritura reflexiva",
+          icon: "book",
+          desc: "Dedicar tiempo para escribir pensamientos y sentimientos, fomentando la autoexploración y comprensión.",
+          duration: "20m",
+          points: 40,
+          color: "#ffc107",
+          subTasks: []
+        },
+        {
+          id: 40005,
+          name: "Conexión social",
+          icon: "people",
+          desc: "Realizar un esfuerzo consciente para interactuar con amigos o familiares, ya sea virtualmente o en persona, para reducir el aislamiento.",
+          duration: "30m",
+          points: 60,
+          color: "#03a9f4",
+          subTasks: []
+        },
+        {
+          id: 40006,
+          name: "Prácticas de gratitud",
+          icon: "happy",
+          desc: "Listar diariamente tres cosas por las que estás agradecido, promoviendo una perspectiva positiva.",
+          duration: "10m",
+          points: 20,
+          color: "#ffeb3b",
+          subTasks: []
+        },
+        {
+          id: 40007,
+          name: "Rutinas de sueño regulares",
+          icon: "moon",
+          desc: "Establecer y mantener una rutina de sueño constante para mejorar la calidad del descanso nocturno.",
+          duration: "8h",
+          points: 50,
+          color: "#795548",
+          subTasks: []
+        }
+      ]
+    }
     
     
     
-  }]
+  
+  ]
 
 const ChallengeCard = ({ title, desc, image, pts }) => {
   return (
