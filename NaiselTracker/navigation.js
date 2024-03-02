@@ -14,11 +14,32 @@ import ChatScreen from "./components/src/Talk/ChatScreen";
 import TimerScreen from "./components/src/General/TimerScreen";
 import StatsScreen from "./components/src/stats/StatsScreen";
 import PlansScreen from "./components/src/settings/PlanScreen";
-
+import Login1 from "./components/src/login/Login";
+import Register from "./components/src/login/Register";
 
 const Stack = createStackNavigator();
+const AuthStack = createStackNavigator(); // Crea un nuevo Stack para el flujo de autenticación
 
-export default function Navigation({ userProfileExists }) { // Recibe userProfileExists como prop
+export function AuthFlow() {
+    return (
+        <NavigationContainer>
+      <AuthStack.Navigator
+      initialRouteName="Login1"
+        presentation="modal" // Define el modo del navigator como modal
+        screenOptions={{
+          gestureEnabled: true,
+          headerShown: false,
+          ...TransitionPresets.ModalPresentationIOS, // Usa el preset para modales, disponible en iOS
+        }}>
+        <AuthStack.Screen name="Login1" component={Login1} />
+        <AuthStack.Screen name="Register" component={Register} />
+      </AuthStack.Navigator>
+      </NavigationContainer>
+    );
+  }
+  
+
+export function Navigation({ userProfileExists }) { // Recibe userProfileExists como prop
     return (
         <NavigationContainer>
             <Stack.Navigator

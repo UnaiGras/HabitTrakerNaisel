@@ -1,22 +1,25 @@
-import React, { useEffect, useState, createContext } from 'react';
+import React, { useEffect, useState } from 'react';
 import { StatusBar } from 'expo-status-bar';
 import { StyleSheet, View, ActivityIndicator, AppState } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import Navigation from './navigation';
+import {Navigation, AuthFlow }from './navigation';
 import * as Notifications from "expo-notifications"
 import { ApolloClient, InMemoryCache, ApolloProvider } from '@apollo/client';
 import { createUploadLink } from "apollo-upload-client"
+import AuthContext from './AuthContext';
 
-export const AuthContext = createContext()
+
 
 export default function App() {
   const [loading, setLoading] = useState(true);
   const [userProfileExists, setUserProfileExists] = useState(false);
   const [token, setUserToken] = useState('')
+  const [showLogin, setShowLogin] = useState(false);
+  const [reload, setReload] = useState(false)
   const [client, setClient] = useState(
     new ApolloClient({
     link: createUploadLink({
-      uri: 'http://192.168.0.13:4000/graphql',
+      uri: 'http://192.168.0.12:3000/graphql',
       headers: {
         'authorization': `bearer `
       }
@@ -25,18 +28,45 @@ export default function App() {
   }))
 
   useEffect(() => {
-    const checkUserProfile = async () => {
+    const checkUserProfileAndAuthSettings = async () => {
       try {
         const userProfile = await AsyncStorage.getItem('userProfile');
         setUserProfileExists(userProfile !== null);
+  
+        // Comprobación y configuración de usingaccount
+        let usingAccount = await AsyncStorage.getItem('usingaccount');
+        if (usingAccount === null) {
+          // Si no existe, establece el valor por defecto en AsyncStorage
+          await AsyncStorage.setItem('usingaccount', 'false');
+          usingAccount = 'false'; // Asegúrate de que la variable también tenga el valor por defecto
+        }
+  
+        // Comprobación y configuración del token
+        let token = await AsyncStorage.getItem('token');
+        if (token === null) {
+          // Si no existe, establece el valor por defecto en AsyncStorage
+          await AsyncStorage.setItem('token', '');
+          token = ''; // Asegúrate de que la variable también tenga el valor por defecto
+        }
+
+        console.log("Is user using account?: ", usingAccount )
+        console.log("This is the token of user: ", token)
+  
+        // Actualiza el estado basado en usingaccount y token
+        if (usingAccount === 'true' && (!token || token === '')) {
+          setShowLogin(true);
+        } else {
+          setShowLogin(false);
+        }
       } catch (error) {
-        console.error("Error al verificar el perfil del usuario", error);
+        console.error("Error al verificar el perfil del usuario y la configuración de autenticación", error);
       }
       setLoading(false);
     };
-
-    checkUserProfile();
-  }, []);
+  
+    checkUserProfileAndAuthSettings();
+  }, [reload]);
+  
 
   useEffect(() => {
     const subscription = AppState.addEventListener("change", nextAppState => {
@@ -55,14 +85,19 @@ export default function App() {
     setClient(
       new ApolloClient({
       link: createUploadLink({
-        uri: 'http://192.168.0.13:4000/graphql',
+        uri: 'http://192.168.0.12:3000/graphql',
         headers: {
           'authorization': `bearer ${token}`
         }
       }),
       cache: new InMemoryCache(),
     }))
+    setShowLogin(false)
   },[token])
+
+  const reloadTheApp = () => {
+    setReload(prev => !prev)
+  }
 
   const scheduleHabitReminder = async () => {
     const userProfileStr = await AsyncStorage.getItem('userProfile');
@@ -95,11 +130,15 @@ export default function App() {
 
   return (
     <ApolloProvider client={client}>
-    <View style={styles.container}>
-      <Navigation userProfileExists={userProfileExists}/>
-      <StatusBar style="auto" />
-    </View>
-    </ApolloProvider>
+    <AuthContext.Provider value={{ setToken: setUserToken, reloadTheApp }}>
+      {showLogin ? <AuthFlow /> : (
+        <View style={styles.container}>
+          <Navigation userProfileExists={userProfileExists}/>
+          <StatusBar style="auto" />
+        </View>
+      )}
+    </AuthContext.Provider>
+  </ApolloProvider>
   );
 }
 

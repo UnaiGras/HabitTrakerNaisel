@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { View, Text, Image, StyleSheet, TouchableOpacity } from 'react-native';
+import { View, Text, Image, StyleSheet, TouchableOpacity, ScrollView } from 'react-native';
 import AppBar from '../General/AppBar';
 
 const challenges = [{
@@ -311,6 +311,7 @@ const ChallengeCard = ({ title, desc, image, pts }) => {
 
 const ChallengesFeed = ({navigation}) => {
     return (
+      <ScrollView>
       <View style={styles.feedContainer}>
         <Text style={styles.screenText}>Retos</Text>
         {challenges.map((challenge, index) => (
@@ -326,6 +327,7 @@ const ChallengesFeed = ({navigation}) => {
         ))}
         <AppBar navigation={navigation} position={"challenge"}/>
       </View>
+      </ScrollView>
     );
   };
 

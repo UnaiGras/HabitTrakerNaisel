@@ -15,6 +15,8 @@ const TimerScreen = ({ route }) => {
   const startTimeKey = `startTime_${id}`;
   const durationKey = `duration_${id}`;
 
+  console.log("Este es el id de el usuario: ", id)
+
   useEffect(() => {
     const checkTime = async () => {
       const startTime = await AsyncStorage.getItem(startTimeKey);
@@ -31,6 +33,8 @@ const TimerScreen = ({ route }) => {
           setTime(0);
           setIsActive(false);
           Alert.alert("Cronómetro finalizado", "El tiempo para tu actividad ha terminado.");
+          await AsyncStorage.removeItem(startTimeKey);
+          await AsyncStorage.removeItem(durationKey);
         }
       }
     };

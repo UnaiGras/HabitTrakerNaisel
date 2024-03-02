@@ -1,10 +1,12 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import { View, Text, Switch, TouchableOpacity, StyleSheet, Platform } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as Notifications from "expo-notifications"
+import AuthContext from '../../../AuthContext';
 
 const SettingsScreen = ({navigation}) => {
+  const { reloadTheApp } = useContext(AuthContext);
   const [isEnabled, setIsEnabled] = useState(false);
 
   useEffect(() => {
@@ -57,6 +59,25 @@ const SettingsScreen = ({navigation}) => {
     }
   };
 
+  const handleGoLogin = async () => {
+    try {
+      console.log("Estas entrando en la funcion")
+      // Leer el valor actual de usingAccount desde AsyncStorage
+      const usingAccount = await AsyncStorage.getItem('usingaccount');
+      const isUsingAccount = JSON.parse(usingAccount);
+      console.log("UsingAccount in Settings: ", usingAccount)
+      // Si usingAccount es false, cambiarlo a true y luego recargar la app
+      if (isUsingAccount === false) {
+        await AsyncStorage.setItem('usingaccount', JSON.stringify(true));
+        console.log("Estas en la rama que deberia reiniciar la app")
+        // Llamar a reloadTheApp para recargar la aplicación
+        reloadTheApp();
+      }
+    } catch (error) {
+      console.error('Error al acceder a AsyncStorage', error);
+    }
+  };
+
   return (
     <View style={styles.container}>
 
@@ -77,7 +98,7 @@ const SettingsScreen = ({navigation}) => {
 
       <View style={{paddingVertical: 20}}/>
       
-      <TouchableOpacity style={styles.settingItem} onPress={() => {}}>
+      <TouchableOpacity style={styles.settingItem} onPress={handleGoLogin}>
         <Ionicons name={Platform.OS === 'android' ? "logo-google" : "logo-apple"} size={24} color="white" />
         <Text style={styles.settingText}>{Platform.OS === 'android' ? "Conectar con Google" : "Conectar con iOS"}</Text>
       </TouchableOpacity>
@@ -107,7 +128,7 @@ const SettingsScreen = ({navigation}) => {
       </TouchableOpacity>
 
       <TouchableOpacity style={[styles.settingItem, styles.delete]} onPress={() => {navigation.navigate("PlansScreen")}}>
-        <Ionicons name="trash" size={24} color="#a565f2" />
+        <Ionicons name="trash" size={24} color="red" />
         <Text style={styles.settingText}>Borrar Cuenta</Text>
       </TouchableOpacity>
     </View>
@@ -153,7 +174,7 @@ const styles = StyleSheet.create({
     borderColor: "#a565f2",
   },
   delete: {
-    borderWidth: 0.3,
+    borderWidth: 0.5,
     borderColor: "red"
   }
 });

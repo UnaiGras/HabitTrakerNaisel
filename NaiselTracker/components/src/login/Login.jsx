@@ -1,11 +1,17 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useContext } from 'react';
 import { View, TextInput, StyleSheet, Image, Text, Button, TouchableOpacity } from 'react-native';
 import { useFormik } from 'formik';
 import * as Yup from 'yup';
 import { useMutation } from '@apollo/client';
 import { LOGIN } from './loginQueries';
+import AuthContext from '../../../AuthContext';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
-export default function Login1({ navigation, setToken }) {
+
+
+export default function Login1({ navigation }) {
+
+    const {setToken} = useContext(AuthContext)
 
     const [error, setError] = useState('');
 
@@ -16,9 +22,18 @@ export default function Login1({ navigation, setToken }) {
     });
 
     useEffect(() => {
+        const saveTokenAndLogin = async (token) => {
+            try {
+                await AsyncStorage.setItem('token', token); // Almacenar el token en AsyncStorage
+                setToken(token); // Actualizar el estado del token en el contexto
+            } catch (error) {
+                setError('Error al guardar el token');
+            }
+        };
+
         if (result.data) {
             const { value: token } = result.data.login;
-            setToken(token);
+            saveTokenAndLogin(token);
         }
     }, [result.data]);
 
@@ -118,5 +133,10 @@ const styles = StyleSheet.create({
       height: 200,
       alignSelf: "center",
       borderRadius: 20
+    },
+    registerText: {
+        color: "white",
+        fontWeight: "700"
     }
+    
   });

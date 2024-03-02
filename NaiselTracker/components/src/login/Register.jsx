@@ -14,13 +14,11 @@ const registerSchema = yup.object().shape({
     email: yup.string().email('Correo electrónico no válido').required('El correo electrónico es requerido'),
     username: yup.string().required('El nombre de usuario es requerido'),
     password: yup.string().min(8, 'La contraseña debe tener al menos 8 caracteres').required('La contraseña es requerida'),
-    phone: yup.string().required('El número de teléfono es requerido'),
 });
  
 
 
 export default function Register({navigation}) {
-    const [image, setImage] = useState('')
     const [addUser, result] = useMutation(REGISTER, {
         onError: error => {
             console.log(error)
@@ -30,26 +28,10 @@ export default function Register({navigation}) {
     useEffect(() => {
         if(result.data){
             console.log(result.data)
-            navigation.navigate('MainScreen')
+            navigation.goBack()
         }
     }, [result.data])
 
-    const handleUpload = (image) => {
-        const data = new FormData()
-        data.append("file", image)
-        data.append("upload_preset","slinepreset" )
-        data.append("cloud_name", "dasfna79h")
-    
-        fetch("https://api.cloudinary.com/v1_1/dasfna79h/image/upload", {
-            method:"post",
-            body: data
-        }).then(res =>res.json()).
-        then(data=>{
-            console.log(data)
-            setImage(data.secure_url)
-        })
-        
-    }
 
     
     const formik = useFormik({
@@ -57,15 +39,13 @@ export default function Register({navigation}) {
             name: '',
             email: '',
             username: '',
-            password: '',
-            phone: ''
+            password: ''
         },
         validationSchema: registerSchema,
         onSubmit: (values) => {
             addUser({
                 variables: 
                 {
-                    profilePhoto: image,
                     username: values.username, 
                     password: values.password,
                     name: values.name,
@@ -85,7 +65,7 @@ export default function Register({navigation}) {
 
                     <View style={{width: '100%', alignItems: 'center', marginTop: 50}}>
                     <View style= { { borderRadius: 100}}>
-                       <Ionicons name="image" size={200}/>
+                       <Ionicons name="person-circle" size={200}/>
                     </View>
                     </View>
                     <View style={{
@@ -148,10 +128,9 @@ export default function Register({navigation}) {
                         >
                             <Text style={{
                                 padding: 10,
-                                fontSize: 14, 
+                                fontSize: 14,
                                 fontStyle: 'italic', 
                                 fontWeight: '700'
-
                             }}>
                                 REGISTER
                             </Text>

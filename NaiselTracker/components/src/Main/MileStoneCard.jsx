@@ -1,5 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import { Animated, View, Text, StyleSheet, Modal, Image } from 'react-native';
+import { imageMap } from './ProgressBar';
+//El problema es que milestone no esta cojiendo la imagende require y solo tiene el nombre, hay que ponerle u indice o exportar elde progressbar
+
+
 
 const MilestoneCard = ({ visible, milestone, onHide }) => {
   const [showModal, setShowModal] = useState(visible);
@@ -35,7 +39,7 @@ const MilestoneCard = ({ visible, milestone, onHide }) => {
     <Modal transparent visible={showModal} animationType="none">
       <View style={styles.centeredView}>
         <Animated.View style={[styles.modalView, { opacity }]}>
-          <Image source={{ uri: milestone.icon }} style={styles.milestoneImage} />
+          <Image source={imageMap[milestone.icon]} style={styles.milestoneImage} />
           <Text style={styles.milestoneText}>{milestone.name}</Text>
           <Text style={styles.milestoneDescription}>{milestone.description}</Text>
         </Animated.View>
@@ -49,7 +53,7 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: 'rgba(0, 0, 0, 0.5)', // Fondo semi-transparente
+    backgroundColor: '#252525', // Fondo semi-transparente
   },
   modalView: {
     margin: 20,

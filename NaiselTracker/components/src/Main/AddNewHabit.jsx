@@ -87,7 +87,8 @@ const AddHabitScreen = ({navigation}) => {
         icon: selectedIcon,
         subTasks: subtasks.map(subtask => ({
           id: subtask.id,
-          name: subtask.name // Asegúrate de que esto coincide con la estructura deseada
+          name: subtask.name,
+          lastCompletedDate: null,
         })),
         points: habitPoints || 0,
         desc: habitDescription,

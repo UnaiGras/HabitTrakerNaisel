@@ -12,8 +12,8 @@ userProfile ={
         color: "#d76fee",
         lastCompletedDate: "2024-02-09",
         subTasks: [
-          { id: 1, name: "Calentamiento dinámico" },
-          { id: 2, name: "Ejercicios de alta intensidad" },
+          { id: 1, name: "Calentamiento dinámico", lastCompletedDate: "2024-02-09", },
+          { id: 2, name: "Ejercicios de alta intensidad", lastCompletedDate: "2024-02-09", },
         ]
         },
     ],

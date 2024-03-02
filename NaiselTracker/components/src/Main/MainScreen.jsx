@@ -481,6 +481,39 @@ const MainScreen = ({navigation}) => {
       }
     };
 
+    const updateSubtaskCompletionDate = async (habitId, subtaskId) => {
+      try {
+        const userProfileString = await AsyncStorage.getItem('userProfile');
+        if (userProfileString !== null) {
+          // Convertir el string de userProfile a objeto
+          const userProfile = JSON.parse(userProfileString);
+    
+          // Encontrar el hábito específico
+          const habitIndex = userProfile.activeHabits.findIndex(habit => habit.id === habitId);
+          if (habitIndex !== -1) {
+            // Encontrar la subtask específica
+            const subtaskIndex = userProfile.activeHabits[habitIndex].subTasks.findIndex(subtask => subtask.id === subtaskId);
+            if (subtaskIndex !== -1) {
+              // Verificar si la subtask tiene el campo lastCompletedDate
+              if (!userProfile.activeHabits[habitIndex].subTasks[subtaskIndex].hasOwnProperty('lastCompletedDate')) {
+                userProfile.activeHabits[habitIndex].subTasks[subtaskIndex].lastCompletedDate = null; // Añadir con valor null si no existe
+              }
+    
+              // Actualizar con la fecha actual
+              userProfile.activeHabits[habitIndex].subTasks[subtaskIndex].lastCompletedDate = new Date().toISOString().split('T')[0];
+    
+              // Guardar el objeto userProfile actualizado en AsyncStorage
+              await AsyncStorage.setItem('userProfile', JSON.stringify(userProfile));
+            }
+          }
+        }
+      } catch (error) {
+        console.error('Error al actualizar la fecha de completado de la subtask:', error);
+      }
+    };
+    
+    
+
     useEffect(() => {
       // Lógica para cargar sonidos
       loadSounds();
@@ -502,7 +535,6 @@ const MainScreen = ({navigation}) => {
           const storedUserProfile = await AsyncStorage.getItem('userProfile');
           if (storedUserProfile !== null) {
             const profile = JSON.parse(storedUserProfile);
-            console.log(profile);
             setUserProfile(profile); // Actualiza el perfil del usuario en el estado
             setHabits(profile.activeHabits); // Actualiza los hábitos activos en el estado
 
@@ -520,7 +552,6 @@ const MainScreen = ({navigation}) => {
                 activeChallengeHabits.filter(habit => habit.lastCompletedDate === todayStr).map(habit => habit.id)
               );
               setCompletedChallengeHabits(completedChallengeHabitsToday);
-
             }
                       
             // Después: Usa dailyHabitTracking para establecer los hábitos completados
@@ -711,7 +742,11 @@ const MainScreen = ({navigation}) => {
           <FlatList
             data={selectedHabit.subTasks}
             renderItem={({ item, index }) => (
-              <SubtaskItem subtask={item} />
+              <SubtaskItem 
+              subtask={item} 
+              unUpdate={updateSubtaskCompletionDate}
+              habitId={selectedHabit.id}
+              />
             )}
             keyExtractor={(item) => `subtask-${item.id}`}
             style={styles.subtaskList}
@@ -769,11 +804,15 @@ const ScoreCounter = ({ finalScore, increasePointsSound }) => {
   );
 };
 
-const SubtaskItem = ({ subtask }) => {
+const SubtaskItem = ({ subtask, onUpdate, habitId }) => {
   const [isCompleted, setIsCompleted] = useState(false);
 
   const handleToggleSubtask = () => {
-    setIsCompleted(!isCompleted);
+    const newCompletedState = !isCompleted;
+    setIsCompleted(newCompletedState);
+    if (newCompletedState) {
+      onUpdate(habitId, subtask.id); // Actualiza la fecha de última completación
+    }
   };
 
   return (
@@ -783,6 +822,7 @@ const SubtaskItem = ({ subtask }) => {
     </TouchableOpacity>
   );
 };
+
 
 
 

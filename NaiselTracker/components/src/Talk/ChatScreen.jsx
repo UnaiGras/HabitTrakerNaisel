@@ -55,7 +55,7 @@ const ChatScreen = () => {
       // Añadir el mensaje del sistema como el contexto al inicio
       const systemMessage = { role: "system", content: context };
   
-      const response = await fetch('http://192.168.1.19:3000/chat', {
+      const response = await fetch('http://192.168.0.12:3000/chat', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
