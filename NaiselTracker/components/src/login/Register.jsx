@@ -130,7 +130,8 @@ export default function Register({navigation}) {
                                 padding: 10,
                                 fontSize: 14,
                                 fontStyle: 'italic', 
-                                fontWeight: '700'
+                                fontWeight: '700',
+                                color: "white"
                             }}>
                                 REGISTER
                             </Text>
@@ -179,14 +180,14 @@ const styles = StyleSheet.create({
         borderRadius: 15,
         width: "80%",
         alignSelf: "center",
-        shadowColor: "#00c1b9",
+        shadowColor: "#a565f2",
         shadowOffset: {
-            width: 30,
-            height: 15,
+            width: 5,
+            height: 5,
         },
         shadowOpacity: 0.90,
-        shadowRadius: 24.00,
+        shadowRadius: 30.00,
 
-        elevation: 20,
+        elevation: 10,
     }
 }) 

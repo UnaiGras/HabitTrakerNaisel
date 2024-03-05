@@ -8,7 +8,8 @@ import {
   TouchableOpacity, 
   FlatList,
   Button,
-  Image
+  Image,
+  Alert
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import HabitCard from './HabitCard';
@@ -511,6 +512,15 @@ const MainScreen = ({navigation}) => {
         console.error('Error al actualizar la fecha de completado de la subtask:', error);
       }
     };
+
+    const handleGoDuels = async () => {
+      const isLoggedIn = await checkUserLoggedAndToken(true); // Utiliza la función para verificar si el usuario está logueado
+      if (isLoggedIn) {
+          // Si el usuario está logueado, navega a DuelScreen
+          navigation.navigate("DuelScreen");
+      }
+      // Si el usuario no está logueado, checkUserLoggedAndToken ya habrá mostrado un alerta, así que no necesitas hacer nada más aquí.
+  };
     
     
 
@@ -608,13 +618,16 @@ const MainScreen = ({navigation}) => {
           width: "90%",
           justifyContent: "space-between", 
           paddingVertical: 10, 
-          alignSelf: "center" 
+          alignSelf: "center"
         }}>
           <View style={{flexDirection: "row"}}>
             <Text style={styles.dayText}>{month}</Text>
             <Text style={styles.monthText}>{year}</Text>
           </View>
         <View style={styles.iconContainer}>
+        <TouchableOpacity onPress={handleGoDuels}>
+            <Ionicons name="people-circle" size={30} color="white" style={{ marginRight: 20 }} />
+          </TouchableOpacity>
           <TouchableOpacity onPress={() => navigation.navigate("StatsScreen")}>
             <Ionicons name="stats-chart" size={30} color="white" style={{ marginRight: 20 }} />
           </TouchableOpacity> 
@@ -687,23 +700,32 @@ const MainScreen = ({navigation}) => {
           ListFooterComponent={<View style={{ height: 600 }} />}
         />
   ):(
-        <FlatList
-          data={challengeHabits}
-          renderItem={({ item }) => (
-              <HabitCard
-                title={item.name}
-                icon={item.icon}
-                duration={item.duration}
-                color={item.color}
-                onComplete={() => handleCompleteChallengeHabit(item.id)}
-                isCompleted={completedChallengeHabits.has(item.id)}
-                openInfo={() => handlePresentModalPress(item)}
-              />
-          )}
-          keyExtractor={(item) => item.id.toString()}
-          contentContainerStyle={{paddingBottom: 50 }}
-          ListFooterComponent={<View style={{ height: 600 }} />}
-        />
+    challengeHabits && challengeHabits.length > 0 ? (
+      <FlatList
+        data={challengeHabits}
+        renderItem={({ item }) => (
+            <HabitCard
+              title={item.name}
+              icon={item.icon}
+              duration={item.duration}
+              color={item.color}
+              onComplete={() => handleCompleteChallengeHabit(item.id)}
+              isCompleted={completedChallengeHabits.has(item.id)}
+              openInfo={() => handlePresentModalPress(item)}
+            />
+        )}
+        keyExtractor={(item) => item.id.toString()}
+        contentContainerStyle={{paddingBottom: 50 }}
+        ListFooterComponent={<View style={{ height: 600 }} />}
+      />
+    ) : (
+      // Mensaje cuando no hay challengeHabits
+      <View style={{ justifyContent: "center"}}>
+      <Text style={{ textAlign: 'center', marginTop: 20, color: "gray", fontSize: 30, fontWeight: "700", maxWidth: "80%", alignSelf: "center"}}>
+        Aún no has aceptado ningún reto.
+      </Text>
+    </View>
+    )
   )
   }
 </View>
@@ -858,6 +880,11 @@ const checkAndUpdateStreak = (userProfile, today) => {
   // Crea una copia profunda del userProfile para evitar mutaciones directas
   let updatedProfile = JSON.parse(JSON.stringify(userProfile));
 
+  // Asegúrate de que updatedProfile.achievements esté definido
+  if (!updatedProfile.achievements) {
+    updatedProfile.achievements = [];
+  }
+
   // Comprueba si todos los hábitos han sido completados hoy
   const allHabitsCompletedToday = updatedProfile.activeHabits.every(habit => 
     habit.lastCompletedDate === today
@@ -902,10 +929,11 @@ const checkAndUpdateStreak = (userProfile, today) => {
     });
   }
 
-  console.log(allHabitsCompletedToday ? "Se a actualizado la racha": "No se a actualizado la racha")
+  console.log(allHabitsCompletedToday ? "Se ha actualizado la racha": "No se ha actualizado la racha")
 
   return updatedProfile;
 };
+
 
 const updateProductivity = (userProfile, today) => {
   // Crea una copia profunda del userProfile para evitar mutaciones directas
@@ -981,6 +1009,34 @@ async function ensureNotificationPermissions() {
     console.error('Error updating userProfile with notification permission status:', error);
   }
 }
+
+
+export const checkUserLoggedAndToken = async (showAlert) => {
+    try {
+        const token = await AsyncStorage.getItem('token'); // Intentar recuperar el token de AsyncStorage
+        if (token) {
+            // Si hay un token, asumimos que el usuario está logueado
+            console.log('Usuario logueado con token:', token);
+            return true; // Puedes retornar true o el token, según necesites
+        } else {
+            // Si no hay token, el usuario no está logueado
+            // Mostrar un mensaje indicando que se requiere iniciar sesión
+            if(showAlert){
+            Alert.alert(
+                "Inicio de sesión requerido",
+                "Debes iniciar sesión para continuar. Ve a Ajustes > Login.",
+                [
+                    { text: "OK" } // Puedes agregar un botón para redirigir al usuario a la pantalla de login si lo deseas
+                ]
+            );}
+            return false;
+        }
+    } catch (error) {
+        // En caso de un error al recuperar el token, también podrías manejarlo aquí
+        console.error('Error al verificar el estado de inicio de sesión:', error);
+        return false;
+    }
+};
 
 
 

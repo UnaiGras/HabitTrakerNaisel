@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, ScrollView } from 'react-native';
 import { useQuery } from '@apollo/client';
-import { DUEL_DETAILS } from './queries';
+import { DUEL_DETAILS } from './duelQuerys';
 import { Ionicons } from '@expo/vector-icons';
 import moment from 'moment'; // Para manejar fechas más fácilmente
 

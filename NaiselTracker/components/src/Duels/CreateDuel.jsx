@@ -1,5 +1,5 @@
-import React, { useState, useRef, useMemo } from 'react';
-import { View, TextInput, Button, StyleSheet, Alert } from 'react-native';
+import React, { useState, useRef, useMemo, useCallback, useEffect } from 'react';
+import { View, TextInput, Button, StyleSheet, Alert, FlatList, Text, TouchableOpacity } from 'react-native';
 import { gql, useMutation, useQuery } from '@apollo/client';
 import { BottomSheetModal, BottomSheetModalProvider } from '@gorhom/bottom-sheet';
 import CreateDuelHabitForm from './createDuelHabit';
@@ -33,6 +33,8 @@ const CreateDuelRequestForm = ({ toUserId, habitos }) => {
   const [modalVisible, setModalVisible] = useState(false);
   const [searchString, setSearchString] = useState('');
   const [selectedUser, setSelectedUser] = useState(null);
+  const [selectedDuration, setSelectedDuration] = useState(null);
+  const [duelPoints, setDuelPoints] = useState(0)
 
   const bottomSheetRef = useRef(null);
   const snapPoints = useMemo(() => ['25%', '50%', '90%'], []);
@@ -47,6 +49,12 @@ const CreateDuelRequestForm = ({ toUserId, habitos }) => {
     setSelectedUser(user);
     setSearchString(''); // Limpiar la barra de búsqueda
   };
+
+  const handlePresentModalPress = useCallback(() => {
+    console.log("abre")
+    setModalVisible(true)
+    bottomSheetRef.current?.present();
+  }, []);
 
 
   const handleInputChange = (name, value) => {
@@ -91,6 +99,21 @@ const CreateDuelRequestForm = ({ toUserId, habitos }) => {
     setModalVisible(false); // Cierra el modal después de añadir el hábito
   };
 
+  const calculatePoints = () => {
+    const basePointsPerDay = 2; // Define cuántos puntos vale cada día
+    const totalDays = selectedDuration; // La duración seleccionada es el total de días
+    const numberOfHabits = habits.length; // El número de hábitos
+    
+    // Calcula los puntos totales
+    const totalPoints = basePointsPerDay * totalDays * numberOfHabits;
+    
+    return totalPoints;
+  }
+
+  useEffect(() => {
+    setDuelPoints(calculatePoints())
+  }, [selectedDuration, habits])
+
   
 
   const renderItem = ({ item }) => (
@@ -105,7 +128,7 @@ const CreateDuelRequestForm = ({ toUserId, habitos }) => {
     <View style={styles.container}>
         { selectedUser &&
         <View style={styles.selectedUserCard}>
-            <Text>{selectedUser.name}</Text>
+            <Text style={{color: "white"}}>{selectedUser.name}</Text>
             <TouchableOpacity onPress={() => setSelectedUser(null)}>
               <Text>Change User</Text>
             </TouchableOpacity>
@@ -126,9 +149,10 @@ const CreateDuelRequestForm = ({ toUserId, habitos }) => {
           data={data.searchUsers}
           keyExtractor={(item) => item.id}
           renderItem={({ item }) => (
-            <TouchableOpacity onPress={() => handleSelectUser(item)}>
-              <Text>{item.name}</Text>
-            </TouchableOpacity>
+            <TouchableOpacity onPress={() => handleSelectUser(item)} style={styles.userCard}>
+  <Text style={styles.userText}>{item.name}</Text>
+</TouchableOpacity>
+
           )}
         />
       )}
@@ -140,27 +164,29 @@ const CreateDuelRequestForm = ({ toUserId, habitos }) => {
         value={duelInput.name}
         onChangeText={(text) => handleInputChange('name', text)}
       />
-      <Button title="Add New Habit" onPress={() => setModalVisible(true)} />
+      <Button title="Add New Habit" onPress={handlePresentModalPress} />
       <FlatList
         data={habits}
         renderItem={renderItem}
         keyExtractor={(item) => item.id}
         contentContainerStyle={styles.listContainer}
       />
-      <TextInput
-        style={styles.input}
-        placeholder="Duration (Days)"
-        keyboardType="numeric"
-        value={duelInput.durationDays}
-        onChangeText={(text) => handleInputChange('durationDays', text)}
-      />
-      <TextInput
-        style={styles.input}
-        placeholder="Points"
-        keyboardType="numeric"
-        value={duelInput.points}
-        onChangeText={(text) => handleInputChange('points', text)}
-      />
+      <View style={styles.durationContainer}>
+        {[3, 7, 14, 28].map((duration) => (
+          <TouchableOpacity
+            key={duration}
+            style={[
+              styles.durationButton,
+              selectedDuration === duration && styles.selectedDuration,
+            ]}
+            onPress={() => setSelectedDuration(duration)}
+          >
+            <Text style={styles.durationButtonText}>{`${duration} días`}</Text>
+          </TouchableOpacity>
+        ))}
+      </View>
+      <Text style={styles.pointsText}>Puntos del reto: {calculatePoints()}</Text>
+
       
       <Button title="Send Duel Request" onPress={handleSubmit} />
     
@@ -171,6 +197,7 @@ const CreateDuelRequestForm = ({ toUserId, habitos }) => {
         snapPoints={snapPoints}
         style={{ backgroundColor: "#202020" }}
         backgroundStyle={{ backgroundColor: "#202020" }}
+        
       >
         <CreateDuelHabitForm onCreateDuelHabit={onCreateDuelHabit} />
       </BottomSheetModal>
@@ -184,52 +211,126 @@ const CreateDuelRequestForm = ({ toUserId, habitos }) => {
 
 const styles = StyleSheet.create({
   container: {
-    padding: 20,
+    flex: 1,
+    backgroundColor: '#121212', // Fondo oscuro para el contenedor principal
+    padding: 20, // Espaciado interior
+    paddingTop: 80
   },
-  input: {
-    height: 40,
-    marginBottom: 12,
-    borderWidth: 1,
-    padding: 10,
-  },
-  listContainer: {
-    paddingHorizontal: 10,
-  },
-  itemContainer: {
-    backgroundColor: '#f9c2ff',
-    padding: 20,
-    marginVertical: 8,
-    borderRadius: 10,
-  },
-  itemTitle: {
-    fontSize: 18,
-  },
-  button: {
-    borderRadius: 20,
-    padding: 10,
-    elevation: 2
-  },
-  buttonClose: {
-    backgroundColor: "#2196F3",
-  },
-  textStyle: {
+  pointsText: {
     color: "white",
-    fontWeight: "bold",
-    textAlign: "center"
-  },
-  searchInput: {
-    height: 40,
-    borderColor: 'gray',
-    borderWidth: 1,
-    padding: 10,
-    marginBottom: 10,
+    fontSize: 30,
+    fontWeight: "800"
   },
   selectedUserCard: {
+    backgroundColor: '#282828', // Fondo de tarjeta más claro que el contenedor
+    borderRadius: 15, // Bordes redondeados
+    padding: 15, // Espaciado interior
+    marginBottom: 20, // Margen inferior
+    shadowColor: '#000', // Sombra
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.23,
+    shadowRadius: 2.62,
+    elevation: 4, // Elevación para Android
+    alignItems: 'center', // Alineación de los elementos de la tarjeta
+  },
+  searchInput: {
+    backgroundColor: '#333333', // Color de fondo para el input
+    color: 'white', // Color del texto
+    paddingHorizontal: 10, // Espaciado horizontal interior
+    paddingVertical: 8, // Espaciado vertical interior
+    borderRadius: 10, // Bordes redondeados
+    marginBottom: 10, // Margen inferior
+  },
+  input: {
+    backgroundColor: '#333333', // Fondo del input
+    color: 'white',  // Color del texto
+    paddingHorizontal: 20, // Más espacio horizontal
+    paddingVertical: 15, // Más espacio vertical para hacer el input más grande
+    fontSize: 18, // Hacer el texto más grande
+    borderRadius: 10,
+    marginBottom: 20, // Aumentar el espacio entre inputs
+  },
+  listContainer: {
+    backgroundColor: '#242424', // Un poco más claro que el contenedor principal
     padding: 10,
-    margin: 10,
-    borderWidth: 1,
-    borderColor: 'gray',
-    borderRadius: 5,
+    borderRadius: 10, // Bordes redondeados para la FlatList
+    marginBottom: 20, // Asegurar que haya espacio debajo de la lista
+  },
+  button: {
+    backgroundColor: '#1F1F1F', // Fondo oscuro para el botón
+    paddingVertical: 10, // Espaciado vertical
+    paddingHorizontal: 20, // Espaciado horizontal
+    borderRadius: 10, // Bordes redondeados
+    alignItems: 'center', // Centrar texto
+    justifyContent: 'center', // Centrar texto
+    shadowColor: '#000', // Sombra
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+    elevation: 5, // Elevación para Android
+    marginBottom: 20, // Espacio debajo del botón
+  },
+  buttonText: {
+    color: 'white', // Color del texto
+    fontSize: 16, // Tamaño del texto
+    fontWeight: 'bold', // Negrita
+  },
+  loadingText: {
+    color: 'grey', // Color del texto para "Cargando..."
+    fontSize: 16, // Tamaño del texto
+    textAlign: 'center', // Centrar texto
+    marginBottom: 20, // Espacio debajo del texto
+  },
+  errorText: {
+    color: 'red', // Color del texto para errores
+    fontSize: 16, // Tamaño del texto
+    textAlign: 'center', // Centrar texto
+    marginBottom: 20, // Espacio debajo del texto
+  },
+  // Estilización para BottomSheetModal si es necesario
+  bottomSheet: {
+    backgroundColor: "#202020", // Fondo oscuro para el modal
+    borderRadius: 15, // Bordes redondeados para el modal
+    padding: 20, // Espaciado interior para el contenido del modal
+  },
+  userCard: {
+    backgroundColor: '#282828', // Un fondo claro en comparación con el fondo de la app
+    borderRadius: 10, // Bordes redondeados
+    padding: 15, // Espaciado interior para contenido
+    marginBottom: 10, // Espacio entre tarjetas
+    shadowColor: '#000', // Sombra
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.23,
+    shadowRadius: 2.62,
+    elevation: 4, // Elevación para Android
+    flexDirection: 'row', // En caso de que quieras añadir iconos o más texto
+    alignItems: 'center', // Centrar elementos en la tarjeta
+    padding: 20, // Más espacio interior
+    fontSize: 20,
+  },
+  userText: {
+    color: 'white', // Texto claro para contraste
+    fontSize: 16, // Tamaño del texto
+  },
+  durationContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    marginBottom: 20,
+  },
+  durationButton: {
+    backgroundColor: '#333333', // Fondo oscuro para el botón
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    borderRadius: 10, // Bordes redondeados
+    borderWidth: 2,
+    borderColor: 'transparent', // Borde transparente por defecto
+  },
+  selectedDuration: {
+    borderColor: '#8e44ad', // Borde lila para el botón seleccionado
+  },
+  durationButtonText: {
+    color: 'white', // Texto claro para contraste
+    fontSize: 16,
   },
 });
 

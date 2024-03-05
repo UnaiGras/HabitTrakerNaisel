@@ -11,11 +11,11 @@ query DuelRequestsPending {
         habits {
           id
           name
-          description
+          desc
           subTasks {
             id
             name
-            completed
+            lastCompletedDate
           }
         }
       }

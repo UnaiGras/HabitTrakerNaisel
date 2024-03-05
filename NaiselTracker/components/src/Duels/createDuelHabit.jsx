@@ -10,6 +10,9 @@ import {
     FlatList
 } from 'react-native'
 import { Ionicons } from '@expo/vector-icons'
+
+
+
 const CreateDuelHabitForm = ({ onCreateDuelHabit }) => {
   const [habitName, setHabitName] = useState('');
   const [habitDescription, setHabitDescription] = useState('');
@@ -18,6 +21,7 @@ const CreateDuelHabitForm = ({ onCreateDuelHabit }) => {
   const [habitColor, setHabitColor] = useState('');
   const [subtasks, setSubtasks] = useState([]);
   const [selectedIcon, setSelectedIcon] = useState('');
+  const [isFocused, setIsFocused] = useState(false)
 
   const pointsOptions = [10, 20, 30, 40, 50];
   const durations = ['15m', '30m', '45m', '1h', '1,5h'];
@@ -36,14 +40,10 @@ const CreateDuelHabitForm = ({ onCreateDuelHabit }) => {
     setSubtasks([...subtasks, newSubtask]);
   };
 
-  const isPointsAssigned = (points) => {
-    return existingHabits.some(habit => habit.points === points);
-  };
-
   const handlePointsChange = (points) => {
-    if (!isPointsAssigned(points)) {
+
       setHabitPoints(points);
-    }
+
   };
 
   const handleSubtaskChange = (text, id) => {
@@ -149,14 +149,14 @@ const CreateDuelHabitForm = ({ onCreateDuelHabit }) => {
                 style={[
                   styles.durationButton,
                   habitPoints === points ? styles.selected : {},
-                  isPointsAssigned(points) ? styles.disabled : {}
+                  
                 ]}
                 onPress={() => handlePointsChange(points)}
-                disabled={isPointsAssigned(points)}
+
               >
                 <Text style={[
                   styles.durationText,
-                  isPointsAssigned(points) ? styles.disabledText : {}
+
                 ]}>
                   {points}
                 </Text>

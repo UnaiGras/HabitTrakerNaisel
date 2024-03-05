@@ -1,6 +1,7 @@
-import React from 'react';
+import React, {useEffect, useState} from 'react';
 import { View, Text, Image, StyleSheet, TouchableOpacity } from 'react-native';
 import AppBar from '../General/AppBar';
+import { checkUserLoggedAndToken } from '../Main/MainScreen';
 
 const ProfessionalCard = ({ name, desc, image, pts }) => {
   return (
@@ -16,25 +17,49 @@ const ProfessionalCard = ({ name, desc, image, pts }) => {
 
 
 const TalkScreen = ({navigation}) => {
+
+  const [isLoggedIn, setIsLoggedIn] = useState(null);
+
+  useEffect(() => {
+    const verifyLoginStatus = async () => {
+      const result = await checkUserLoggedAndToken(true);
+      setIsLoggedIn(result); // Actualiza el estado con el resultado de la verificación
+    };
+
+    verifyLoginStatus();
+  }, []);
+
+  const handlePressProfessional = (professional) => {
+    if (!isLoggedIn) {
+      // Mostrar alerta si el usuario intenta interactuar sin estar logueado
+      Alert.alert("Acceso Restringido", "Debes iniciar sesión para acceder a esta función.", [{ text: "OK" }]);
+    } else {
+      // Navegación permitida solo si el usuario está logueado
+      navigation.navigate("ChatScreen", {
+        name: professional.name,
+        desc: professional.desc,
+        image: professional.image,
+        context: professional.context,
+        pts: professional.pts,
+      });
+    }
+  };
     return (
       <View style={styles.screenContainer}>
         <Text style={styles.screenText}>Apoyo</Text>
         {professionals.map((professional, index) => (
-          <TouchableOpacity onPress={() => navigation.navigate("ChatScreen", {
-            name: professional.name,
-            desc: professional.desc,
-            image: professional.image,
-            context:professional.context,
-            pts: professional.pts,
-          })}>
+          <TouchableOpacity 
+          key={index} 
+          onPress={isLoggedIn ? () => handlePressProfessional(professional) : () => {}}
+          disabled={!isLoggedIn}
+          style={!isLoggedIn ? {opacity: 0.5} : {}}
+        >
           <ProfessionalCard
-            key={index}
             name={professional.name}
             desc={professional.desc}
             image={professional.image}
           />
-          </TouchableOpacity>
-
+        </TouchableOpacity>
         ))}
         <AppBar navigation={navigation} position={"talk"}/>
       </View>

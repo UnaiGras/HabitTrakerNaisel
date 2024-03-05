@@ -4,10 +4,12 @@ import { Ionicons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as Notifications from "expo-notifications"
 import AuthContext from '../../../AuthContext';
+import { checkUserLoggedAndToken } from '../Main/MainScreen';
 
 const SettingsScreen = ({navigation}) => {
   const { reloadTheApp } = useContext(AuthContext);
   const [isEnabled, setIsEnabled] = useState(false);
+  const [isLoggedIn, setIsLoggedIn] = useState(null);
 
   useEffect(() => {
     const fetchNotificationSetting = async () => {
@@ -22,8 +24,15 @@ const SettingsScreen = ({navigation}) => {
         console.error('Error fetching notification settings', error);
       }
     };
+    const verifyLoginStatus = async () => {
+      const result = await checkUserLoggedAndToken();
+      setIsLoggedIn(result); // Actualiza el estado con el resultado de la verificación
+  };
 
     fetchNotificationSetting();
+    verifyLoginStatus();
+
+    
   }, []);
 
   const ensureNotificationPermissions = async () => {
@@ -105,7 +114,7 @@ const SettingsScreen = ({navigation}) => {
 
       <View style={{paddingVertical: 20}}/>
 
-      <TouchableOpacity style={[styles.settingItem, styles.subscription]} onPress={() => {navigation.navigate("PlansScreen")}}>
+      <TouchableOpacity style={[styles.settingItem, styles.subscription]} onPress={() => {navigation.navigate("BillingPlansScreen")}}>
         <Ionicons name="star" size={24} color="#a565f2" />
         <Text style={styles.settingText}>Conseguir Premium</Text>
       </TouchableOpacity>

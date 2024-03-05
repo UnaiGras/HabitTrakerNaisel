@@ -1,7 +1,8 @@
 
-import React from 'react';
-import { View, Text, Image, StyleSheet, TouchableOpacity, ScrollView } from 'react-native';
+import React, {useState, useEffect}from 'react';
+import { View, Alert,Text, Image, StyleSheet, TouchableOpacity, ScrollView } from 'react-native';
 import AppBar from '../General/AppBar';
+import { checkUserLoggedAndToken } from '../Main/MainScreen';
 
 const challenges = [{
     id: 28398,
@@ -10,6 +11,7 @@ const challenges = [{
     image: require("../../../assets/excursionismo.png"),
     pts: 550,
     days: 31,
+    forLogged: false,
     habits: 
     [
       {
@@ -85,6 +87,7 @@ const challenges = [{
     image: require("../../../assets/atomo.png"),
     pts: 800,
     days: 21,
+    forLogged: false,
     habits: [
       {
         id: 16891,
@@ -157,6 +160,7 @@ const challenges = [{
       image: require("../../../assets/fitnesschallenge.png"),
       pts: 1600,
       days: 60,
+      forLogged: true,
       habits: [
         {
           id: 30001,
@@ -217,6 +221,7 @@ const challenges = [{
       image: require("../../../assets/mental-health.png"),
       pts: 1600,
       days: 60,
+      forLogged: true,
       habits: [
         {
           id: 40001,
@@ -310,14 +315,41 @@ const ChallengeCard = ({ title, desc, image, pts }) => {
 };
 
 const ChallengesFeed = ({navigation}) => {
+
+  const [isLoggedIn, setIsLoggedIn] = useState(null)
+
+  useEffect(() => {
+    const verifyLoginStatus = async () => {
+      const result = await checkUserLoggedAndToken(false);
+      setIsLoggedIn(result); // Actualiza el estado con el resultado de la verificación
+  };
+
+    verifyLoginStatus();
+
+  }, [])
+
+  const handlePressChallenge = (challenge) => {
+    if (challenge.forLogged && !isLoggedIn) {
+      Alert.alert(
+        "Acceso Restringido",
+        "Debes iniciar sesión para acceder a este reto.",
+        [{ text: "OK" }]
+      );
+    } else {
+      navigation.navigate("ChallengeDetails", { challenge: challenge });
+    }
+  };
     return (
-      <ScrollView>
       <View style={styles.feedContainer}>
+      <ScrollView>
         <Text style={styles.screenText}>Retos</Text>
         {challenges.map((challenge, index) => (
-          <TouchableOpacity onPress={() => navigation.navigate("ChallengeDetails", {challenge: challenge})}>
+          <TouchableOpacity
+            key={index}
+            onPress={() => handlePressChallenge(challenge)}
+            style={{ opacity: challenge.forLogged && !isLoggedIn ? 0.5 : 1 }}
+          >
             <ChallengeCard
-              key={index}
               title={challenge.title}
               desc={challenge.desc}
               image={challenge.image}
@@ -325,9 +357,11 @@ const ChallengesFeed = ({navigation}) => {
             />
           </TouchableOpacity>
         ))}
+        <View style={{marginVertical: 20}}/>
+        </ScrollView>
         <AppBar navigation={navigation} position={"challenge"}/>
       </View>
-      </ScrollView>
+      
     );
   };
 

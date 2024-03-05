@@ -16,6 +16,11 @@ import StatsScreen from "./components/src/stats/StatsScreen";
 import PlansScreen from "./components/src/settings/PlanScreen";
 import Login1 from "./components/src/login/Login";
 import Register from "./components/src/login/Register";
+import BillingPlansScreen from "./components/src/Billing/BillingPlans";
+import DuelScreen from "./components/src/Duels/DuelScreen";
+import DuelInfo from "./components/src/Duels/DuelInfo";
+import CreateDuelHabitForm from "./components/src/Duels/createDuelHabit";
+import CreateDuelRequestForm from "./components/src/Duels/CreateDuel";
 
 const Stack = createStackNavigator();
 const AuthStack = createStackNavigator(); // Crea un nuevo Stack para el flujo de autenticación
@@ -173,6 +178,71 @@ export function Navigation({ userProfileExists }) { // Recibe userProfileExists 
                         <Stack.Screen
                             name="PlansScreen"
                             component={PlansScreen}
+                            options={{
+                                headerStyle: {
+                                    backgroundColor: '#151515',
+                                    shadowColor: "#191919",
+                                },
+                                headerTitleStyle: {
+                                    color: "white"
+                                }
+                            }}
+                        />
+                        <Stack.Screen
+                            name="BillingPlansScreen"
+                            component={BillingPlansScreen}
+                            options={{
+                                headerStyle: {
+                                    backgroundColor: '#151515',
+                                    shadowColor: "#191919",
+                                },
+                                headerTitleStyle: {
+                                    color: "white"
+                                }
+                            }}
+                        />
+                        <Stack.Screen
+                            name="DuelScreen"
+                            component={DuelScreen}
+                            options={{
+                                headerStyle: {
+                                    backgroundColor: '#151515',
+                                    shadowColor: "#191919",
+                                },
+                                headerTitleStyle: {
+                                    color: "white"
+                                }
+                            }}
+                        />
+                        <Stack.Screen
+                            name="DuelInfo"
+                            component={DuelInfo}
+                            options={{
+                                headerStyle: {
+                                    backgroundColor: '#151515',
+                                    shadowColor: "#191919",
+                                },
+                                headerTitleStyle: {
+                                    color: "white"
+                                }
+                            }}
+                        />
+                        <Stack.Screen
+                            name="CreateDuelHabitForm"
+                            component={CreateDuelHabitForm}
+                            options={{
+                                headerStyle: {
+                                    backgroundColor: '#151515',
+                                    shadowColor: "#191919",
+                                },
+                                headerTitleStyle: {
+                                    color: "white"
+                                }
+                            }}
+                        />
+                        <Stack.Screen
+                            name="CreateDuelRequestForm"
+                            component={CreateDuelRequestForm}
                             options={{
                                 headerStyle: {
                                     backgroundColor: '#151515',

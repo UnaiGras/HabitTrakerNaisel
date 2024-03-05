@@ -33,6 +33,7 @@ export default function Login1({ navigation }) {
 
         if (result.data) {
             const { value: token } = result.data.login;
+            console.log(token)
             saveTokenAndLogin(token);
         }
     }, [result.data]);
@@ -136,7 +137,10 @@ const styles = StyleSheet.create({
     },
     registerText: {
         color: "white",
-        fontWeight: "700"
+        fontWeight: "700",
+        padding: 10,
+        marginVertical: 10,
+        alignSelf: "center"
     }
     
   });

@@ -10,6 +10,8 @@ import AuthContext from './AuthContext';
 
 
 
+
+
 export default function App() {
   const [loading, setLoading] = useState(true);
   const [userProfileExists, setUserProfileExists] = useState(false);
@@ -43,10 +45,14 @@ export default function App() {
   
         // Comprobación y configuración del token
         let token = await AsyncStorage.getItem('token');
+
+
         if (token === null) {
           // Si no existe, establece el valor por defecto en AsyncStorage
           await AsyncStorage.setItem('token', '');
           token = ''; // Asegúrate de que la variable también tenga el valor por defecto
+        } else {
+          setUserToken(token)
         }
 
         console.log("Is user using account?: ", usingAccount )
