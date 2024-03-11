@@ -4,15 +4,21 @@ import { useQuery } from '@apollo/client';
 import { DUEL_DETAILS } from './duelQuerys';
 import { Ionicons } from '@expo/vector-icons';
 import moment from 'moment'; // Para manejar fechas más fácilmente
+import { ME } from '../Main/mainQuerys';
 
 const DuelInfo = ({ route, navigation }) => {
   const { duelId } = route.params;
+  console.log("Este es el duelId: ", duelId)
+
+  // Suponiendo que 'ME_QUERY' es la query para obtener el usuario en pantalla
+  const { data: userData, loading: userLoading, error: userError } = useQuery(ME);
+
   const { data, loading, error } = useQuery(DUEL_DETAILS, {
     variables: { duelId },
   });
 
-  if (loading) return <Text style={styles.loadingText}>Cargando...</Text>;
-  if (error) return <Text style={styles.errorText}>Error al cargar los datos</Text>;
+  if (loading || userLoading) return <Text style={styles.loadingText}>Cargando...</Text>;
+  if (error || userError) return <Text style={styles.errorText}>Error al cargar los datos</Text>;
 
   const duel = data.duelDetails;
   const now = moment();
@@ -23,7 +29,7 @@ const DuelInfo = ({ route, navigation }) => {
 
   return (
     <ScrollView style={styles.container}>
-      <Text style={styles.title}>Duelo contra {duel.challenged.username}</Text>
+      <Text style={styles.title}>Duelo contra {duel.challenged.username === userData.me.username ? duel.challenger.username : duel.challenged.username}</Text>
       
       {/* Tarjeta de Tiempo Restante */}
       <View style={styles.timeCard}>
@@ -58,11 +64,14 @@ const DuelInfo = ({ route, navigation }) => {
   );
 };
 
+
+
 const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#121212',
     padding: 20,
+    paddingVertical: 60
   },
   title: {
     color: 'white',
@@ -116,11 +125,13 @@ const styles = StyleSheet.create({
     color: 'white',
     textAlign: 'center',
     marginTop: 20,
+    fontSize: 30
   },
   errorText: {
     color: 'red',
     textAlign: 'center',
     marginTop: 20,
+    fontSize: 30
   },
 });
 

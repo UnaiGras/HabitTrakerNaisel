@@ -8,10 +8,13 @@ query DuelRequestsPending {
       status
       duel {
         id
+        name
         habits {
           id
           name
           desc
+          icon
+          color
           subTasks {
             id
             name
@@ -43,12 +46,10 @@ query ActiveDuels {
       points
       name
       challenger {
-        id
         username
         name
       }
       challenged {
-        id
         username
         name
       }
@@ -57,20 +58,21 @@ query ActiveDuels {
 `
 
 export const DUEL_DETAILS = gql`
-query DuelDetails($duelId: ID!) {
-    duelDetails(duelId: $duelId) {
+query DuelDetails($duelId: String) {
+  duelDetails(duelId: $duelId) {
       id
       startTime
       finishTime
-      challengerLastCompletedDate
-      challengedLastCompletedDate
       habits {
         id
         name
+        icon
+        color
+        challengerLastCompletedDate
+        challengedLastCompletedDate
         subTasks {
           id
           name
-          completed
         }
       }
       challenger {
@@ -83,8 +85,8 @@ query DuelDetails($duelId: ID!) {
         username
         name
       }
-    }
-  }  
+  }
+} 
 `
 
 
@@ -100,19 +102,10 @@ query SearchUsers($searchString: String!) {
 
 
 export const ACCEPT_DUEL_REQUEST = gql`
-mutation AcceptDuelRequest($requestId: ID!) {
+mutation AcceptDuelRequest($requestId: String) {
     acceptDuelRequest(requestId: $requestId) {
       id
-      startTime
-      finishTime
-      challenger {
-        id
-        username
-      }
-      challenged {
-        id
-        username
-      }
+      name
     }
   }  
 `

@@ -7,7 +7,8 @@ import {
     StyleSheet,
     ScrollView,
     Modal,
-    FlatList
+    FlatList,
+    Alert
 } from 'react-native'
 import { Ionicons } from '@expo/vector-icons'
 
@@ -22,7 +23,8 @@ const CreateDuelHabitForm = ({ onCreateDuelHabit }) => {
   const [subtasks, setSubtasks] = useState([]);
   const [selectedIcon, setSelectedIcon] = useState('');
   const [isFocused, setIsFocused] = useState(false)
-
+  const [isIconPickerVisible, setIconPickerVisible] = useState(false);
+  
   const pointsOptions = [10, 20, 30, 40, 50];
   const durations = ['15m', '30m', '45m', '1h', '1,5h'];
 
@@ -73,6 +75,7 @@ const CreateDuelHabitForm = ({ onCreateDuelHabit }) => {
       duration: parseInt(habitDuration, 10),
       points: habitPoints,
       color: habitColor,
+      icon: selectedIcon,
       lastCompletedDate: '', // Manejar según la lógica de tu app
       subTasks: subtasks.map(subtask => ({
         id: subtask.id,

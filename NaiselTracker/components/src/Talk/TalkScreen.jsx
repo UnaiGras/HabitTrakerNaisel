@@ -2,6 +2,8 @@ import React, {useEffect, useState} from 'react';
 import { View, Text, Image, StyleSheet, TouchableOpacity } from 'react-native';
 import AppBar from '../General/AppBar';
 import { checkUserLoggedAndToken } from '../Main/MainScreen';
+import { useQuery } from '@apollo/client';
+import { IS_USER_PREMIUM } from '../Main/mainQuerys';
 
 const ProfessionalCard = ({ name, desc, image, pts }) => {
   return (
@@ -19,15 +21,32 @@ const ProfessionalCard = ({ name, desc, image, pts }) => {
 const TalkScreen = ({navigation}) => {
 
   const [isLoggedIn, setIsLoggedIn] = useState(null);
+  const [isUserPremium, setIsUserPremium] = useState(false)
+
+  const { loading, error, data } = useQuery(IS_USER_PREMIUM, {
+    onCompleted: (data) => {
+      console.log("El usuario es premium: ", data)
+    }
+  });
 
   useEffect(() => {
     const verifyLoginStatus = async () => {
-      const result = await checkUserLoggedAndToken(true);
+      const result = await checkUserLoggedAndToken(false);
       setIsLoggedIn(result); // Actualiza el estado con el resultado de la verificación
     };
 
+    const verifyPremiumStatus = async () => {
+      if (data) {
+        setIsUserPremium(data.isUserPremium)
+      } else {
+        console.log("No a llegado la data")
+      }
+    }
+
+
     verifyLoginStatus();
-  }, []);
+    verifyPremiumStatus()
+  }, [data])
 
   const handlePressProfessional = (professional) => {
     if (!isLoggedIn) {
@@ -144,7 +163,7 @@ const professionals = [{
     pts: 550
 }, {
     name: "Rocio",
-    desc: "Experta en trastornos como Depresión y Ansiedad desde hace mas de 20 años.Puedes hablar con ella lo que quieras, desde hacer sesiones de introspeccion hasta establecimiento de un plan de accion",
+    desc: "Experta en el tratamiento de la Depresión y la Ansiedad. Haz sesiones de introspección y establecede un plan de accion",
     image: require("../../../assets/psicologo.png"),
     pts: 800
 }]

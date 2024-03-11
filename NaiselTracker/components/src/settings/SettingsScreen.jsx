@@ -3,36 +3,34 @@ import { View, Text, Switch, TouchableOpacity, StyleSheet, Platform } from 'reac
 import { Ionicons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as Notifications from "expo-notifications"
-import AuthContext from '../../../AuthContext';
+import AuthContext from '../../../AuthContext'
 import { checkUserLoggedAndToken } from '../Main/MainScreen';
 
 const SettingsScreen = ({navigation}) => {
-  const { reloadTheApp } = useContext(AuthContext);
-  const [isEnabled, setIsEnabled] = useState(false);
-  const [isLoggedIn, setIsLoggedIn] = useState(null);
+  const { reloadTheApp } = useContext(AuthContext)
+  const [isEnabled, setIsEnabled] = useState(false)
+  const [isLoggedIn, setIsLoggedIn] = useState(null)
 
   useEffect(() => {
     const fetchNotificationSetting = async () => {
       try {
-        const userProfileStr = await AsyncStorage.getItem('userProfile');
+        const userProfileStr = await AsyncStorage.getItem('userProfile')
         if (userProfileStr) {
-          const userProfile = JSON.parse(userProfileStr);
+          const userProfile = JSON.parse(userProfileStr)
           // Asumiendo que 'activatedNotifications' es un booleano guardado en userProfile
-          setIsEnabled(!!userProfile.activatedNotifications);
+          setIsEnabled(!!userProfile.activatedNotifications)
         }
       } catch (error) {
-        console.error('Error fetching notification settings', error);
+        console.error('Error fetching notification settings', error)
       }
     };
     const verifyLoginStatus = async () => {
-      const result = await checkUserLoggedAndToken();
+      const result = await checkUserLoggedAndToken()
       setIsLoggedIn(result); // Actualiza el estado con el resultado de la verificación
-  };
+  }
 
-    fetchNotificationSetting();
-    verifyLoginStatus();
-
-    
+    fetchNotificationSetting()
+    verifyLoginStatus()
   }, []);
 
   const ensureNotificationPermissions = async () => {

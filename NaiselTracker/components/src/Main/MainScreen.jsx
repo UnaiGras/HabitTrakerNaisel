@@ -23,6 +23,9 @@ import { useIsFocused } from '@react-navigation/native';
 import { Audio } from 'expo-av';
 import * as Notifications from 'expo-notifications';
 import { achivements as definedAchievements} from '../../../achivements';
+import { COMPLETE_DUEL_HABIT, DUEL_DETAILS  } from '../Duels/duelQuerys';
+import { useMutation, useLazyQuery, useQuery } from '@apollo/client';
+import { ME } from './mainQuerys';
 
 
 
@@ -231,10 +234,10 @@ const styles = StyleSheet.create({
       // Estilos base para el texto de tus botones
       color: 'white',
       textAlign: 'center',
-      fontWeight: 14
+      fontWeight: "600"
     },
     selectedButtonText: {
-      fontWeight: 16
+      fontWeight: "600"
     },
     unselectedButtonText: {
       // Opcional: Estilo adicional para el texto del botón no seleccionado si es necesario
@@ -243,7 +246,7 @@ const styles = StyleSheet.create({
       justifyContent: "center",
       padding: 10,
       paddingHorizontal: 20,
-      width: "50%"
+      width: "33%"
     },
     completedAllHabitsStyle: {
       
@@ -282,6 +285,9 @@ const MainScreen = ({navigation}) => {
     const [selectedHabit, setSelectedHabit] = useState(null);
     const [viewMode, setViewMode] = useState('userHabits'); // 'userHabits' o 'challengeHabits'
     const [sounds, setSounds] = useState({});
+    const [duelHabits, setDuelHabits] = useState({})
+    const [me, setMe] = useState({})
+    const [completedDuelHabits, setCompletedDuelHabits] = useState(new Set)
 
 
     const [challengeHabits, setChallengeHabits] = useState([]);
@@ -290,6 +296,16 @@ const MainScreen = ({navigation}) => {
     const [completedHabits, setCompletedHabits] = useState(new Set());
     const [daysCompletedAllHabits, setDaysCompletedAllHabits] = useState([false, false, false, false, false, false, false]);
 
+    const [getDuelData, {data: habitDuels}] = useLazyQuery(DUEL_DETAILS)
+    const [completeDuelHabit, result] = useMutation(COMPLETE_DUEL_HABIT)
+
+
+    useQuery(ME, {
+      onCompleted: (data) => {
+        console.log("esto es la data de el user de la nube", data.me)
+        setMe(data.me)
+      }
+    })
 
 
     const snapPoints = useMemo(() => ['33%', '80%'], []);
@@ -513,6 +529,10 @@ const MainScreen = ({navigation}) => {
       }
     };
 
+    const handleCompleteDuelHabit = async () => {
+
+    }
+
     const handleGoDuels = async () => {
       const isLoggedIn = await checkUserLoggedAndToken(true); // Utiliza la función para verificar si el usuario está logueado
       if (isLoggedIn) {
@@ -545,8 +565,54 @@ const MainScreen = ({navigation}) => {
           const storedUserProfile = await AsyncStorage.getItem('userProfile');
           if (storedUserProfile !== null) {
             const profile = JSON.parse(storedUserProfile);
-            setUserProfile(profile); // Actualiza el perfil del usuario en el estado
+            setUserProfile(profile); 
             setHabits(profile.activeHabits); // Actualiza los hábitos activos en el estado
+             console.log(" active duel guardado en el perfil",profile.activeDuel)
+            
+            if (profile.activeDuel) {
+              const { data } = await getDuelData({
+                variables: {
+                  duelId: profile.activeDuel
+                }
+              });
+              // Actualiza el estado de duelHabits con los hábitos del duelo
+              console.log("*********** Data de los habitos en la nube ************")
+            
+
+            if (data && data.duelDetails) {
+              setDuelHabits(data.duelDetails.habits);
+              console.log("Habitos de el duelo",data.duelDetails.habits)
+              // Comprobación de hábitos completados en el duelo por el usuario
+              const meId = me.id; // Suponiendo que me.id es el id del usuario actual
+             console.log("ME----",me)
+              const challengerId = data.duelDetails.challenger.id;
+              const challengedId = data.duelDetails.challenged.id;
+  
+              console.log({
+                challengerId:data.duelDetails.challenger.id,
+                challengedId:data.duelDetails.challenged.id
+              })
+              const todayStr = new Date().toISOString().split('T')[0];
+              const completedHabitIds = new Set();
+  
+              data.duelDetails.habits.forEach(habit => {
+
+                const challengerLastCompletedDate = new Date(habit.challengerLastCompletedDate);
+                const challengedLastCompletedDate = new Date(habit.challengedLastCompletedDate);
+
+
+                if ((challengerLastCompletedDate.toISOString().split('T')[0] === todayStr && challengerId === meId) ||
+                    (challengedLastCompletedDate.toISOString().split('T')[0] === todayStr && challengedId === meId)) {
+                  completedHabitIds.add(habit.id);
+                }
+                
+              });
+  
+              setCompletedDuelHabits(completedHabitIds);
+              console.log("Completed Habits: ", completedHabitIds)
+              console.log("***************************************")
+            }
+            }
 
             const today = new Date();
             today.setHours(0, 0, 0, 0);
@@ -671,12 +737,15 @@ const MainScreen = ({navigation}) => {
       </View>
       <View >
   <View>
-      <View style={{ flexDirection: 'row', justifyContent: 'space-around', marginVertical: 5, backgroundColor: "#353535", borderRadius: 20, padding: 2, alignSelf: "center", width: "60%" }}>
+      <View style={{ flexDirection: 'row', justifyContent: 'space-around', marginVertical: 5, backgroundColor: "#353535", borderRadius: 20, padding: 2, alignSelf: "center", width: "80%" }}>
       <TouchableOpacity onPress={() => setViewMode('userHabits')} style={[styles.toggleButton, viewMode === 'userHabits' ? styles.selectedButton : styles.unselectedButton]}>
         <Text style={[styles.toggleButtonText, viewMode === 'userHabits' ? styles.selectedButtonText : styles.unselectedButtonText]}>Diarios</Text>
       </TouchableOpacity>
       <TouchableOpacity onPress={() => setViewMode('challengeHabits')} style={[styles.toggleButton, viewMode === 'challengeHabits' ? styles.selectedButton : styles.unselectedButton]}>
         <Text style={[styles.toggleButtonText, viewMode === 'challengeHabits' ? styles.selectedButtonText : styles.unselectedButtonText]}>Reto</Text>
+      </TouchableOpacity>
+      <TouchableOpacity onPress={() => setViewMode('duelHabits')} style={[styles.toggleButton, viewMode === 'duelHabits' ? styles.selectedButton : styles.unselectedButton]}>
+        <Text style={[styles.toggleButtonText, viewMode === 'challengeHabits' ? styles.selectedButtonText : styles.unselectedButtonText]}>Duelo</Text>
       </TouchableOpacity>
     </View>
 
@@ -699,7 +768,7 @@ const MainScreen = ({navigation}) => {
           contentContainerStyle={{paddingBottom: 50 }}
           ListFooterComponent={<View style={{ height: 600 }} />}
         />
-  ):(
+  ): viewMode === 'challengeHabits' ? (
     challengeHabits && challengeHabits.length > 0 ? (
       <FlatList
         data={challengeHabits}
@@ -726,6 +795,24 @@ const MainScreen = ({navigation}) => {
       </Text>
     </View>
     )
+  ): (
+    <FlatList
+      data={duelHabits}
+      renderItem={({ item }) => (
+        <HabitCard
+          title={item.name}
+          icon={item.icon}
+          duration={item.duration}
+          color={item.color}
+          onComplete={() => handleCompleteDuelHabit(item.id)}
+          isCompleted={completedDuelHabits.has(item.id)}
+          openInfo={() => handlePresentModalPress(item)}
+        />
+      )}
+      keyExtractor={(item) => item.id.toString()}
+      contentContainerStyle={{paddingBottom: 50 }}
+      ListFooterComponent={<View style={{ height: 600 }} />}
+    />
   )
   }
 </View>

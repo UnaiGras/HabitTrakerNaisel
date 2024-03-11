@@ -143,23 +143,26 @@ const styles = StyleSheet.create({
       container: {
         flex: 1,
       },
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    padding: 10,
-    backgroundColor: '#353535',
-  },
-  profileImage: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    marginLeft: 10,
-  },
-  headerText: {
-    color: 'white',
-    marginLeft: 10,
-    fontWeight: 'bold',
-  },
+      header: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        paddingVertical: 15, // Modifica el padding para un aspecto más espaciado
+        paddingHorizontal: 20, // Agrega espacio adicional a los lados para un aspecto más equilibrado
+        backgroundColor: '#353535',
+        borderBottomWidth: 1, // Agrega una línea de separación en la parte inferior del encabezado
+        borderBottomColor: '#666', // Color de la línea de separación
+      },
+      profileImage: {
+        width: 40,
+        height: 40,
+        borderRadius: 20,
+        marginRight: 15, // Mueve la imagen de perfil al lado derecho del texto para un mejor equilibrio
+      },
+      headerText: {
+        color: 'white',
+        fontWeight: 'bold',
+        fontSize: 18, // Aumenta el tamaño del texto para mayor legibilidad y presencia
+      },
   messagesList: {
     flex: 1,
   },

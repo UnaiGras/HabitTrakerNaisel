@@ -21,6 +21,8 @@ import DuelScreen from "./components/src/Duels/DuelScreen";
 import DuelInfo from "./components/src/Duels/DuelInfo";
 import CreateDuelHabitForm from "./components/src/Duels/createDuelHabit";
 import CreateDuelRequestForm from "./components/src/Duels/CreateDuel";
+import DuelRequestsPage from "./components/src/Duels/RequestsFeedScreen";
+
 
 const Stack = createStackNavigator();
 const AuthStack = createStackNavigator(); // Crea un nuevo Stack para el flujo de autenticación
@@ -243,6 +245,19 @@ export function Navigation({ userProfileExists }) { // Recibe userProfileExists 
                         <Stack.Screen
                             name="CreateDuelRequestForm"
                             component={CreateDuelRequestForm}
+                            options={{
+                                headerStyle: {
+                                    backgroundColor: '#151515',
+                                    shadowColor: "#191919",
+                                },
+                                headerTitleStyle: {
+                                    color: "white"
+                                }
+                            }}
+                        />
+                        <Stack.Screen
+                            name="DuelRequestsPage"
+                            component={DuelRequestsPage}
                             options={{
                                 headerStyle: {
                                     backgroundColor: '#151515',

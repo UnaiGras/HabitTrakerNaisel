@@ -5,7 +5,19 @@ import { DUEL_REQUESTS_PENDING, ACTIVE_DUELS } from './duelQuerys';
 import { Ionicons } from '@expo/vector-icons';
 
 const DuelScreen = ({navigation}) => {
-  const { data: dataRequests, loading: loadingRequests, error: errorRequests } = useQuery(DUEL_REQUESTS_PENDING);
+  const { data: dataRequests, loading: loadingRequests, error: errorRequests } = useQuery(DUEL_REQUESTS_PENDING, {
+
+    onCompleted: (data) => {
+      console.log("Se a efectuado la query")
+      console.log(data.duelRequestsPending[0].duel)
+    },
+
+    onError: (e) => {
+      console.log(e)
+    }
+    
+  });
+
   const { data: dataDuels, loading: loadingDuels, error: errorDuels } = useQuery(ACTIVE_DUELS);
   
   console.log("Has entrado")
@@ -19,13 +31,16 @@ const DuelScreen = ({navigation}) => {
   if (!dataRequests || !dataDuels) {
     return <Text style={styles.errorText}>Error: Datos no disponibles</Text>;
   }
+  
   return (
     <ScrollView style={styles.container}>
       <Text style={styles.title}>Duelos</Text>
-      <View style={styles.card}>
-        <Ionicons name="paper-plane" size={24} color="white" />
-        <Text style={styles.cardText}>Solicitudes ({dataRequests.duelRequestsPending.length})</Text>
-      </View>
+      <TouchableOpacity onPress={() => navigation.navigate("DuelRequestsPage", {duelRequests: dataRequests})}>
+        <View style={styles.card}>
+          <Ionicons name="paper-plane" size={24} color="white" />
+          <Text style={styles.cardText}>Solicitudes ({dataRequests.duelRequestsPending.length})</Text>
+        </View>
+      </TouchableOpacity>
       <TouchableOpacity style={styles.button} onPress={() => navigation.navigate("CreateDuelRequestForm")}>
         <Text style={styles.buttonText}>Crear nuevo reto</Text>
       </TouchableOpacity>
@@ -33,14 +48,21 @@ const DuelScreen = ({navigation}) => {
       {dataDuels.activeDuels.length === 0 && (
         <Text style={styles.noDataText}>No tienes duelos activos</Text>
       )}
-      {dataDuels.activeDuels.map((duel) => (
-        <TouchableOpacity key={duel.id} style={styles.duelCard}>
+      {dataDuels.activeDuels.map(duel => (
+        <TouchableOpacity key={duel.id} style={styles.duelCard} onPress={() => navigation.navigate("DuelInfo", {duelId: duel.id})}>
+          <View style={{backgroundColor: "#191919", borderRadius: 20, padding: 10, alignItems: "center", justifyContent: "center", marginVertical: 10}}>
           <Text style={styles.duelName}>{duel.name}</Text>
-          <Text style={styles.text}>Contra: {duel.challenger.username} vs {duel.challenged.username}</Text>
-          <Text style={styles.text}>Puntos: {duel.points}</Text>
-          <Text style={styles.text}>Finaliza: {new Date(duel.finishTime).toLocaleDateString()}</Text>
+          <Text style={styles.text}>{duel.challenger.username} vs {duel.challenged.username}</Text>
+          </View>
+          <View style={{backgroundColor: "#191919", borderRadius: 20, padding: 10, alignItems: "center", justifyContent: "center", marginVertical: 10}}>
+          <Text style={styles.text}>Finaliza: {new Date(parseInt(duel.finishTime)).toLocaleString()}</Text>
+          </View>
+          <View style={{backgroundColor: "#191919", borderRadius: 20, padding: 10, alignItems: "center", justifyContent: "center", marginVertical: 10}}>
+          <Text style={styles.dateText}>{duel.points}</Text>
+          </View>
         </TouchableOpacity>
-      ))}
+      ))
+}
 </View>
     </ScrollView>
   );
@@ -96,12 +118,16 @@ const styles = StyleSheet.create({
     elevation: 5,
   },
   duelName: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    color: 'white', // Texto claro
+    fontSize: 28, // Tamaño grande para el nombre del duelo
+    fontWeight: 'bold', // Texto en negrita
+    marginBottom: 5, // Margen inferior para separación
+    color: 'white'
   },
   text: {
-    color: 'grey', // Texto gris claro para el resto
+    fontSize: 19, // Tamaño medio para el texto de los detalles
+    color: 'white', // Color de texto ligeramente más claro
+    marginBottom: 3, // Margen inferior pequeño para separación
+    alignSelf: "center"
   },
   noDataText: {
     color: 'grey', // Mensajes de no datos en gris claro
@@ -118,7 +144,7 @@ const styles = StyleSheet.create({
     color: 'red', // Error en rojo para contraste
     textAlign: 'center',
     marginTop: 10,
-    fontSize: 18, // Ajustado para ser coherente
+    fontSize: 38, // Ajustado para ser coherente
   },
   button: {
     backgroundColor: '#1F1F1F', // Un color que combine con el resto de la UI
@@ -155,6 +181,13 @@ const styles = StyleSheet.create({
     shadowRadius: 2.62,
     elevation: 4, // Elevación para Android para la sombra
     marginBottom: 20, // Espacio debajo del contenedor para separarlo de otros elementos
+  },
+  dateText: {
+    fontSize: 34, // Tamaño más pequeño para las fechas
+    fontStyle: 'italic', // Texto en cursiva
+    color: 'white', // Color de texto aún más claro
+    marginVertical: 3, // Margen inferior pequeño para separación
+    fontWeight: "bold"
   },
 });
 

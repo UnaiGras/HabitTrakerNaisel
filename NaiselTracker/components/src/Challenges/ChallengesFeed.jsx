@@ -3,6 +3,8 @@ import React, {useState, useEffect}from 'react';
 import { View, Alert,Text, Image, StyleSheet, TouchableOpacity, ScrollView } from 'react-native';
 import AppBar from '../General/AppBar';
 import { checkUserLoggedAndToken } from '../Main/MainScreen';
+import { IS_USER_PREMIUM } from '../Main/mainQuerys';
+import { useQuery } from '@apollo/client';
 
 const challenges = [{
     id: 28398,
@@ -80,79 +82,7 @@ const challenges = [{
         ]
       }
     ]    
-  }, {
-    id:  29300,
-    title: "Habitos Atomicos",
-    desc: "Metodo probado: con solo 21 dias puedes cambiar tu vida segun Papa Noel",
-    image: require("../../../assets/atomo.png"),
-    pts: 800,
-    days: 21,
-    forLogged: false,
-    habits: [
-      {
-        id: 16891,
-        name: "Tiempo de reflexión personal",
-        icon: "time",
-        desc: "Dedicar un momento del día a la reflexión personal para aumentar el autoconocimiento.",
-        duration: "20m",
-        points: 20,
-        color: "#03a9f4",
-        subTasks: [
-          { id: 1, name: "Reflexionar sobre metas personales" },
-          { id: 2, name: "Evaluar emociones del día" }
-        ]
-      },
-      {
-        id: 64377,
-        name: "Diario de emociones",
-        icon: "book",
-        desc: "Escribir diariamente sobre tus emociones para entender mejor tus reacciones y sentimientos.",
-        duration: "15m",
-        points: 25,
-        color: "#e91e63",
-        subTasks: [
-          { id: 1, name: "Identificar emociones del día" },
-          { id: 2, name: "Escribir sobre eventos que provocaron esas emociones" }
-        ]
-      },
-      {
-        id: 60527,
-        name: "Práctica de gratitud",
-        icon: "happy",
-        desc: "Enumerar diariamente cosas por las que estás agradecido para fomentar una actitud positiva.",
-        duration: "10m",
-        points: 15,
-        color: "#ffeb3b",
-        subTasks: [
-          { id: 1, name: "Listar tres cosas nuevas por las que estás agradecido cada día" }
-        ]
-      },
-      {
-        id: 83538,
-        name: "Desconexión digital",
-        icon: "phone-portrait-off",
-        desc: "Reservar un tiempo sin dispositivos electrónicos para reducir el estrés y mejorar la calidad del sueño.",
-        duration: "30m",
-        points: 30,
-        color: "#9c27b0",
-        subTasks: [
-          { id: 1, name: "Apagar dispositivos electrónicos una hora antes de dormir" }
-        ]
-      },
-      {
-        id: 98766,
-        name: "Ejercicios de respiración",
-        icon: "leaf",
-        desc: "Realizar ejercicios de respiración profunda para reducir la ansiedad y mejorar la concentración.",
-        duration: "10m",
-        points: 20,
-        color: "#4caf50",
-        subTasks: [
-          { id: 1, name: "Practicar la respiración diafragmática" },
-          { id: 2, name: "Utilizar aplicaciones de meditación para guiar la respiración" }
-        ]
-      }
-    ]},
+  },
     {
       id: 40001,
       title: "Operación Bikini",
@@ -306,7 +236,11 @@ const ChallengeCard = ({ title, desc, image, pts }) => {
     <View style={styles.cardContainer}>
       <View style={styles.textContainer}>
         <Text style={styles.title}>{title}</Text>
-        <Text style={styles.desc} numberOfLines={4}>{desc}</Text>
+        <Text 
+          style={styles.desc}
+          numberOfLines={4}>
+            {desc}
+          </Text>
         <Text style={styles.pts}>{pts} pts</Text>
       </View>
       <Image source={image} style={styles.image} />
@@ -317,16 +251,32 @@ const ChallengeCard = ({ title, desc, image, pts }) => {
 const ChallengesFeed = ({navigation}) => {
 
   const [isLoggedIn, setIsLoggedIn] = useState(null)
+  const [isUserPremium, setIsUserPremium] = useState(false)
+
+  const { loading, error, data } = useQuery(IS_USER_PREMIUM, {
+    onCompleted: (data) => {
+      console.log("El usuario es premium: ", data)
+    }
+  });
 
   useEffect(() => {
     const verifyLoginStatus = async () => {
       const result = await checkUserLoggedAndToken(false);
       setIsLoggedIn(result); // Actualiza el estado con el resultado de la verificación
-  };
+    };
+
+    const verifyPremiumStatus = async () => {
+      if (data) {
+        setIsUserPremium(data.isUserPremium)
+      } else {
+        console.log("No a llegado la data")
+      }
+    }
+
 
     verifyLoginStatus();
-
-  }, [])
+    verifyPremiumStatus()
+  }, [data])
 
   const handlePressChallenge = (challenge) => {
     if (challenge.forLogged && !isLoggedIn) {

@@ -4,6 +4,9 @@ import { gql, useMutation, useQuery } from '@apollo/client';
 import { BottomSheetModal, BottomSheetModalProvider } from '@gorhom/bottom-sheet';
 import CreateDuelHabitForm from './createDuelHabit';
 import { SEARCH_USER } from './duelQuerys';
+import { ScrollView } from 'react-native-gesture-handler';
+import { Ionicons } from '@expo/vector-icons';
+
 
 const GENERATE_AND_SEND_DUEL_REQUEST = gql`
   mutation GenerateAndSendDuelRequest($input: GenerateAndSendDuelRequestInput!) {
@@ -37,7 +40,7 @@ const CreateDuelRequestForm = ({ toUserId, habitos }) => {
   const [duelPoints, setDuelPoints] = useState(0)
 
   const bottomSheetRef = useRef(null);
-  const snapPoints = useMemo(() => ['25%', '50%', '90%'], []);
+  const snapPoints = useMemo(() => ['50%', '90%'], []);
 
   const [generateAndSendDuelRequest] = useMutation(GENERATE_AND_SEND_DUEL_REQUEST);
   const { data, loading, error } = useQuery(SEARCH_USER, {
@@ -117,11 +120,16 @@ const CreateDuelRequestForm = ({ toUserId, habitos }) => {
   
 
   const renderItem = ({ item }) => (
-    <View style={styles.itemContainer}>
-      <Text style={styles.itemTitle}>{item.name}</Text>
-      <Text>{item.description}</Text>
+    <View style={styles.card}>
+      {/* Asegúrate de tener un nombre de icono válido para Ionicons aquí. */}
+      {console.log(item)}
+      <Ionicons style={styles.icon} name={item.icon} size={38} color={item.color} />
+      <Text style={styles.title}>
+        {item.name} {/* Cambié de item.title a item.name basándome en tu log */}
+      </Text>
     </View>
   );
+  
 
   return (
     <BottomSheetModalProvider>
@@ -150,9 +158,9 @@ const CreateDuelRequestForm = ({ toUserId, habitos }) => {
           keyExtractor={(item) => item.id}
           renderItem={({ item }) => (
             <TouchableOpacity onPress={() => handleSelectUser(item)} style={styles.userCard}>
-  <Text style={styles.userText}>{item.name}</Text>
-</TouchableOpacity>
-
+          <Text style={styles.userText}>
+            {item.name}</Text>
+          </TouchableOpacity>
           )}
         />
       )}
@@ -164,13 +172,16 @@ const CreateDuelRequestForm = ({ toUserId, habitos }) => {
         value={duelInput.name}
         onChangeText={(text) => handleInputChange('name', text)}
       />
-      <Button title="Add New Habit" onPress={handlePresentModalPress} />
+<View style={styles.listContainer}> 
+      <TouchableOpacity style={styles.button} onPress={handlePresentModalPress}>
+        <Text style={styles.buttonText}>Add New Habit</Text>
+      </TouchableOpacity>
       <FlatList
         data={habits}
         renderItem={renderItem}
-        keyExtractor={(item) => item.id}
-        contentContainerStyle={styles.listContainer}
+        keyExtractor={(item) => item.name}
       />
+</View>
       <View style={styles.durationContainer}>
         {[3, 7, 14, 28].map((duration) => (
           <TouchableOpacity
@@ -188,8 +199,10 @@ const CreateDuelRequestForm = ({ toUserId, habitos }) => {
       <Text style={styles.pointsText}>Puntos del reto: {calculatePoints()}</Text>
 
       
-      <Button title="Send Duel Request" onPress={handleSubmit} />
-    
+      <TouchableOpacity style={styles.button} onPress={handleSubmit}>
+        <Text style={styles.buttonText}>Send Duel Request</Text>
+      </TouchableOpacity>
+
     {modalVisible &&
       <BottomSheetModal
         ref={bottomSheetRef}
@@ -199,7 +212,9 @@ const CreateDuelRequestForm = ({ toUserId, habitos }) => {
         backgroundStyle={{ backgroundColor: "#202020" }}
         
       >
+      <ScrollView>
         <CreateDuelHabitForm onCreateDuelHabit={onCreateDuelHabit} />
+        </ScrollView>
       </BottomSheetModal>
       }
 
@@ -212,7 +227,7 @@ const CreateDuelRequestForm = ({ toUserId, habitos }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#121212', // Fondo oscuro para el contenedor principal
+    backgroundColor: '#151515', // Fondo oscuro para el contenedor principal
     padding: 20, // Espaciado interior
     paddingTop: 80
   },
@@ -257,21 +272,20 @@ const styles = StyleSheet.create({
     marginBottom: 20, // Asegurar que haya espacio debajo de la lista
   },
   button: {
-    backgroundColor: '#1F1F1F', // Fondo oscuro para el botón
-    paddingVertical: 10, // Espaciado vertical
-    paddingHorizontal: 20, // Espaciado horizontal
-    borderRadius: 10, // Bordes redondeados
-    alignItems: 'center', // Centrar texto
-    justifyContent: 'center', // Centrar texto
-    shadowColor: '#000', // Sombra
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.25,
-    shadowRadius: 3.84,
+    backgroundColor: '#8A2BE2', // Lila
+    padding: 10,
+    borderRadius: 20, // Bordes redondeados
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginVertical: 5, // Margen vertical para separar los botones
+    shadowColor: '#000', // Color de la sombra
+    shadowOffset: { width: 0, height: 2 }, // Desplazamiento de la sombra
+    shadowOpacity: 0.25, // Opacidad de la sombra
+    shadowRadius: 3.84, // Radio de la sombra
     elevation: 5, // Elevación para Android
-    marginBottom: 20, // Espacio debajo del botón
   },
   buttonText: {
-    color: 'white', // Color del texto
+    color: '#FFF', // Texto en blanco
     fontSize: 16, // Tamaño del texto
     fontWeight: 'bold', // Negrita
   },
@@ -320,7 +334,7 @@ const styles = StyleSheet.create({
   durationButton: {
     backgroundColor: '#333333', // Fondo oscuro para el botón
     paddingVertical: 10,
-    paddingHorizontal: 20,
+    paddingHorizontal: 10,
     borderRadius: 10, // Bordes redondeados
     borderWidth: 2,
     borderColor: 'transparent', // Borde transparente por defecto
@@ -331,6 +345,36 @@ const styles = StyleSheet.create({
   durationButtonText: {
     color: 'white', // Texto claro para contraste
     fontSize: 16,
+  },
+  card: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    padding: 16,
+    marginVertical: 8,
+    borderRadius: 20,
+    backgroundColor: '#353535', // Fondo original de la tarjeta
+    borderRightWidth: 4,
+    borderRightColor: 'transparent', // Borde derecho por defecto
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.23,
+    shadowRadius: 2.62,
+    shadowColor: "#a565f2",
+    elevation: 4,
+  },
+  title: {
+    color: 'white',
+    fontSize:18,
+    fontWeight: "700",
+    maxWidth: "90%"
+  },
+  icon: {
+    marginRight: 10,
+  },
+  infoArea: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    // Estilos adicionales si son necesarios
   },
 });
 
