@@ -79,6 +79,11 @@ const ChatScreen = () => {
         sender: 'assistant'
       };
       setMessages(currentMessages => [...currentMessages, responseMessage]);
+      setTimeout(() => {
+        if (flatListRef.current) {
+          flatListRef.current.scrollToEnd({ animated: true });
+        }
+      }, 100);
     } catch (error) {
       console.error('Error al enviar el mensaje:', error);
     }

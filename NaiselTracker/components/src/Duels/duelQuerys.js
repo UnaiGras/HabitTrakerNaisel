@@ -63,6 +63,10 @@ query DuelDetails($duelId: String) {
       id
       startTime
       finishTime
+      challengerPoints
+      challengedPoints
+      durationDays
+      points
       habits {
         id
         name

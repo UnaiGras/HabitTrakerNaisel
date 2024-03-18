@@ -18,12 +18,13 @@ const DuelRequestsPage = ({ navigation ,route }) => {
         // Obtener el objeto userProfile almacenado en AsyncStorage
         const userProfileString = await AsyncStorage.getItem('userProfile')
         let userProfile = userProfileString ? JSON.parse(userProfileString) : {}
-        
+
         userProfile.activeDuel = data.acceptDuelRequest.id;
-        
-  
-        // Guardar el userProfile actualizado en AsyncStorage
+        console.log(data.acceptDuelRequest.id)
+
         await AsyncStorage.setItem('userProfile', JSON.stringify(userProfile));
+        
+        navigation.goBack()
       } catch (error) {
         console.error('Error al actualizar el userProfile en AsyncStorage:', error);
       }

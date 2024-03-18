@@ -36,14 +36,19 @@ const OnboardingScreen = ({ navigation }) => {
     // Crea el objeto userProfile
     const userProfile = {
       points: 0,
-      level: 0, // Asume que tienes una función para calcular el nivel
+      level: 0,
       activeHabits: recommendedHabits,
       premium: false,
       activeChallenges: [],
+      termsAccepted: false,
+      currentStreak: {
+        count: 0,
+        startDate: null, 
+      },
       milestones: {
         currentMilestone: 0,
         nextMilestone: 1
-    }
+      }
     };
   
     // Guarda el userProfile en AsyncStorage
@@ -230,8 +235,8 @@ const styles = StyleSheet.create({
   },
   atomoImage: {
     position: "absolute",
-    width: 350, // Asumiendo que quieres que la imagen ocupe todo el ancho disponible
-    height: 350, // Puedes ajustar esto según tu necesidad
+    width: 250, // Asumiendo que quieres que la imagen ocupe todo el ancho disponible
+    height: 250, // Puedes ajustar esto según tu necesidad
     bottom: 120,
     left: -80
 },
@@ -241,7 +246,7 @@ const styles = StyleSheet.create({
     width: "80%",
     padding: 20,
     borderRadius: 30,
-    bottom: 150,
+    bottom: 50,
     alignItems: "center"
   },
   buttonText: {

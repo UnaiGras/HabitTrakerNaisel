@@ -1,5 +1,13 @@
 import React, { useState, useEffect, useContext } from 'react';
-import { View, Text, Switch, TouchableOpacity, StyleSheet, Platform } from 'react-native';
+import { 
+  View, 
+  Text,
+  Switch, 
+  TouchableOpacity, 
+  StyleSheet, 
+  Platform,
+  Alert
+} from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as Notifications from "expo-notifications"
@@ -26,7 +34,7 @@ const SettingsScreen = ({navigation}) => {
     };
     const verifyLoginStatus = async () => {
       const result = await checkUserLoggedAndToken()
-      setIsLoggedIn(result); // Actualiza el estado con el resultado de la verificación
+      setIsLoggedIn(result); 
   }
 
     fetchNotificationSetting()
@@ -47,6 +55,17 @@ const SettingsScreen = ({navigation}) => {
 
     return granted;
   };
+
+  const handlePressAlert = async() => {
+    Alert.alert(
+      "Estas Seguro de que quieres borrar tu cuenta",
+      "Si presionas OK tu cuenta sera borrada permanenetemente junto a los datos guardados",
+      [
+        {text: "Cancelar"},
+        { text: "OK" }
+      ]
+    )
+  }
 
   const toggleSwitch = async () => {
     const granted = await ensureNotificationPermissions();
@@ -134,7 +153,7 @@ const SettingsScreen = ({navigation}) => {
         <Text style={styles.settingText}>Compartir</Text>
       </TouchableOpacity>
 
-      <TouchableOpacity style={[styles.settingItem, styles.delete]} onPress={() => {navigation.navigate("PlansScreen")}}>
+      <TouchableOpacity style={[styles.settingItem, styles.delete]} onPress={handlePressAlert}>
         <Ionicons name="trash" size={24} color="red" />
         <Text style={styles.settingText}>Borrar Cuenta</Text>
       </TouchableOpacity>

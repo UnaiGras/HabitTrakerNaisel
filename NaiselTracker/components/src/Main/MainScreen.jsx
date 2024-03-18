@@ -9,7 +9,8 @@ import {
   FlatList,
   Button,
   Image,
-  Alert
+  Alert,
+  Modal
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import HabitCard from './HabitCard';
@@ -26,6 +27,7 @@ import { achivements as definedAchievements} from '../../../achivements';
 import { COMPLETE_DUEL_HABIT, DUEL_DETAILS  } from '../Duels/duelQuerys';
 import { useMutation, useLazyQuery, useQuery } from '@apollo/client';
 import { ME } from './mainQuerys';
+import TermsAndConditions from '../General/TermsAndConditions';
 
 
 
@@ -72,6 +74,29 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
     paddingHorizontal: 15,
     borderRadius: 20,
+  },
+  centeredView: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(0,0,0,0.5)', // Añade un fondo oscuro para resaltar el modal
+  },
+  modalView: {
+    margin: 20,
+    backgroundColor: 'white',
+    borderRadius: 20,
+    padding: 35,
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
+    elevation: 5,
+    width: '80%', // Ajusta esto según lo grande que quieras que sea el modal
+    height: '60%', // Ajusta esto según lo grande que quieras que sea el modal
   },
   dayButtonText: {
     color: 'white',
@@ -288,7 +313,7 @@ const MainScreen = ({navigation}) => {
     const [duelHabits, setDuelHabits] = useState({})
     const [me, setMe] = useState({})
     const [completedDuelHabits, setCompletedDuelHabits] = useState(new Set)
-
+    const [termsAccepted, seTermsAccepted] = useState()
 
     const [challengeHabits, setChallengeHabits] = useState([]);
     const [completedChallengeHabits, setCompletedChallengeHabits] = useState(new Set());
@@ -541,6 +566,23 @@ const MainScreen = ({navigation}) => {
       }
       // Si el usuario no está logueado, checkUserLoggedAndToken ya habrá mostrado un alerta, así que no necesitas hacer nada más aquí.
   };
+
+  const acceptTermsAndConditions = async() => {
+    try {
+      const userProfileJson = await AsyncStorage.getItem('userProfile');
+      const userProfile = userProfileJson ? JSON.parse(userProfileJson) : {};
+
+      // Actualizar sólo el campo termsAccepted a true
+      userProfile.termsAccepted = true;
+
+      // Guardar el objeto modificado de vuelta en AsyncStorage
+      await AsyncStorage.setItem('userProfile', JSON.stringify(userProfile));
+      seTermsAccepted(true)
+      console.log('Términos aceptados y perfil actualizado.');
+    } catch (error) {
+      console.log('Error al actualizar el perfil:', error);
+    }
+  }
     
     
 
@@ -567,7 +609,8 @@ const MainScreen = ({navigation}) => {
             const profile = JSON.parse(storedUserProfile);
             setUserProfile(profile); 
             setHabits(profile.activeHabits); // Actualiza los hábitos activos en el estado
-             console.log(" active duel guardado en el perfil",profile.activeDuel)
+            seTermsAccepted(profile.termsAccepted)
+            console.log(" active duel guardado en el perfil",profile.activeDuel)
             
             if (profile.activeDuel) {
               const { data } = await getDuelData({
@@ -677,6 +720,22 @@ const MainScreen = ({navigation}) => {
       }} 
       edges={['top', 'left', 'right']}
       >
+      {!termsAccepted && 
+        <Modal
+        animationType="slide"
+        transparent={true}
+        visible={!termsAccepted}
+        onRequestClose={() => {
+          alert("Los términos y condiciones deben ser aceptados para continuar.");
+        }}
+      >
+        <View style={styles.centeredView}>
+          <View style={styles.modalView}>
+            <TermsAndConditions onAcceptTerms={acceptTermsAndConditions} />
+          </View>
+        </View>
+      </Modal>
+      }
       <View style={styles.headerContainer}>
       <View style={{ 
           flexDirection: 'row', 
