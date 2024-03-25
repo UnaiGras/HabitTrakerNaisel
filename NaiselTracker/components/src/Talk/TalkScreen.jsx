@@ -165,5 +165,6 @@ const professionals = [{
     name: "Rocio",
     desc: "Experta en el tratamiento de la Depresión y la Ansiedad. Haz sesiones de introspección y establecede un plan de accion",
     image: require("../../../assets/psicologo.png"),
+    context: "Eres una psicologa experta en la depresion y ansiedad, eres amable y estableces un plan de accion",
     pts: 800
 }]

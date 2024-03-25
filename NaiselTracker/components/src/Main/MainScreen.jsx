@@ -82,21 +82,18 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(0,0,0,0.5)', // Añade un fondo oscuro para resaltar el modal
   },
   modalView: {
-    margin: 20,
-    backgroundColor: 'white',
     borderRadius: 20,
-    padding: 35,
     alignItems: 'center',
-    shadowColor: '#000',
+    shadowColor: '#a565f2',
     shadowOffset: {
-      width: 0,
-      height: 2,
+      width: 4,
+      height: 4,
     },
     shadowOpacity: 0.25,
     shadowRadius: 4,
     elevation: 5,
-    width: '80%', // Ajusta esto según lo grande que quieras que sea el modal
-    height: '60%', // Ajusta esto según lo grande que quieras que sea el modal
+    width: '75%', // Ajusta esto según lo grande que quieras que sea el modal
+    height: '75%', // Ajusta esto según lo grande que quieras que sea el modal
   },
   dayButtonText: {
     color: 'white',
@@ -109,7 +106,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#191919', // Un color más oscuro que el fondo de la pantalla
     justifyContent: 'center', // Centra el contenido verticalmente
     alignItems: 'center', // Centra el contenido horizontalmente
-    padding: 30,
+    padding: 20,
     marginVertical: 20,
     borderRadius: 20,
     // Propiedades de sombreado para efecto de elevación
@@ -143,8 +140,10 @@ const styles = StyleSheet.create({
 
     modalContent: {
       backgroundColor: "#202020",
-      borderRadius: 30,
+      borderRadius: 15,
       overflow: 'hidden', // Esto es para asegurar que el contenido no se desborde de los bordes redondeados
+      width: "90%",
+      alignSelf: "center"
     },
     modalHeader: {
       paddingVertical: 20,
@@ -313,7 +312,7 @@ const MainScreen = ({navigation}) => {
     const [duelHabits, setDuelHabits] = useState({})
     const [me, setMe] = useState({})
     const [completedDuelHabits, setCompletedDuelHabits] = useState(new Set)
-    const [termsAccepted, seTermsAccepted] = useState()
+    const [termsAccepted, seTermsAccepted] = useState(true)
 
     const [challengeHabits, setChallengeHabits] = useState([]);
     const [completedChallengeHabits, setCompletedChallengeHabits] = useState(new Set());
@@ -892,7 +891,7 @@ const MainScreen = ({navigation}) => {
       index={1}
       snapPoints={snapPoints}
       style={{ backgroundColor: "#202020" }}
-      backgroundStyle={{ backgroundColor: "#202020" }}
+      backgroundStyle={{ backgroundColor: "#353535" }}
     >
       <View style={styles.modalContent}>
         <View style={styles.modalHeader}>

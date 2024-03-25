@@ -36,7 +36,7 @@ const styles = StyleSheet.create({
     container: {
       flex: 1,
       backgroundColor: '#121212', // Fondo oscuro
-      padding: 20,
+      padding: 20
     },
     termsScrollView: {
       flex: 1,

@@ -58,6 +58,14 @@ const DuelInfo = ({ route, navigation }) => {
   const leaderUsername = isChallengerLeader ? duelInfo.challenger.username : duelInfo.challenged.username;
   const followerUsername = isChallengerLeader ? duelInfo.challenged.username : duelInfo.challenger.username;
 
+  let isValidTimeLeft = true;
+
+  // Revisar si el tiempo actual es mayor que el tiempo de finalización del duelo
+  if (now.isAfter(finishTime)) {
+      // El duelo ha terminado, entonces el tiempo restante no es válido
+      isValidTimeLeft = false;
+  }
+
   const renderHabitDetails = () => (
     <BottomSheetModal
       ref={bottomSheetModalRef}
