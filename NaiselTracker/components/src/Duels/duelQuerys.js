@@ -72,6 +72,7 @@ query DuelDetails($duelId: String) {
         name
         icon
         color
+        points
         challengerLastCompletedDate
         challengedLastCompletedDate
         subTasks {
@@ -115,7 +116,7 @@ mutation AcceptDuelRequest($requestId: String) {
 `
 
 export const COMPLETE_DUEL_HABIT = gql`
-mutation CompleteHabit($duelId: ID!, $habitId: ID!) {
+mutation CompleteHabit($duelId: String, $habitId: String) {
     completeHabit(duelId: $duelId, habitId: $habitId) {
       id
       name

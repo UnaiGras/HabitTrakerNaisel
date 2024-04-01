@@ -44,21 +44,24 @@ const DuelScreen = ({navigation}) => {
       <TouchableOpacity style={styles.button} onPress={() => navigation.navigate("CreateDuelRequestForm")}>
         <Text style={styles.buttonText}>Crear nuevo reto</Text>
       </TouchableOpacity>
-<View style={styles.duelsContainer}>
+<View >
       {dataDuels.activeDuels.length === 0 && (
         <Text style={styles.noDataText}>No tienes duelos activos</Text>
       )}
       {dataDuels.activeDuels.map(duel => (
         <TouchableOpacity key={duel.id} style={styles.duelCard} onPress={() => navigation.navigate("DuelInfo", {duelId: duel.id})}>
-          <View style={{backgroundColor: "#191919", borderRadius: 20, padding: 10, alignItems: "center", justifyContent: "center", marginVertical: 10}}>
+          <View style={{backgroundColor: "#232323", borderRadius: 20, padding: 10, alignItems: "center", justifyContent: "center", marginVertical: 10, width: "100%"}}>
+          <Text style={{
+            fontSize: 18,
+            color: '#BDBDBD', // Gris más suave para los detalles
+            textAlign: 'center',
+          }}>{duel.challenger.username} vs {duel.challenged.username}</Text>
           <Text style={styles.duelName}>{duel.name}</Text>
-          <Text style={styles.text}>{duel.challenger.username} vs {duel.challenged.username}</Text>
-          </View>
-          <View style={{backgroundColor: "#191919", borderRadius: 20, padding: 10, alignItems: "center", justifyContent: "center", marginVertical: 10}}>
-          <Text style={styles.text}>Finaliza: {new Date(parseInt(duel.finishTime)).toLocaleString()}</Text>
-          </View>
-          <View style={{backgroundColor: "#191919", borderRadius: 20, padding: 10, alignItems: "center", justifyContent: "center", marginVertical: 10}}>
           <Text style={styles.dateText}>{duel.points}</Text>
+          <View style={{height: 2, width: "90%", borderRadius: 20, backgroundColor: "#353535"}}/>
+          <View style={{backgroundColor: "#191919", borderRadius: 20, paddingVertical: 10, alignItems: "center", justifyContent: "center", marginTop: 20, width: "100%"}}>
+          <Text style={styles.text}>{new Date(parseInt(duel.finishTime)).toLocaleString()}</Text>
+          </View>
           </View>
         </TouchableOpacity>
       ))
@@ -104,30 +107,37 @@ const styles = StyleSheet.create({
     color: 'white', // Texto claro
   },
   duelCard: {
-    backgroundColor: '#333333', // Gris oscuro, puedes hacerlo un poco más claro si quieres
-    padding: 15,
-    borderRadius: 10,
-    marginBottom: 10,
-    shadowColor: '#000', // Sombra
+    borderRadius: 15, // Bordes más redondeados para un aspecto más moderno
+    marginBottom: 20,
+    shadowColor: '#9C27B0', // Sombra lila para dar un toque único
     shadowOffset: {
       width: 0,
-      height: 2,
+      height: 4,
     },
-    shadowOpacity: 0.25,
-    shadowRadius: 3.84,
-    elevation: 5,
+    shadowOpacity: 0.3, // Opacidad de la sombra para no saturar
+    shadowRadius: 5, // Radio de la sombra para un efecto suave
+    elevation: 8, // Elevación para Android
+    alignItems: 'center', // Centra los elementos horizontalmente
+    justifyContent: 'center', // Centra los elementos verticalmente para una distribución uniforme
   },
   duelName: {
-    fontSize: 28, // Tamaño grande para el nombre del duelo
-    fontWeight: 'bold', // Texto en negrita
-    marginBottom: 5, // Margen inferior para separación
-    color: 'white'
+    fontSize: 26,
+    fontWeight: 'bold',
+    color: '#E0E0E0', // Un gris claro para destacar el nombre del duelo
+    marginBottom: 10, // Espacio antes de los detalles del duelo
+    textAlign: 'center', // Alineación central para el nombre
   },
   text: {
-    fontSize: 19, // Tamaño medio para el texto de los detalles
-    color: 'white', // Color de texto ligeramente más claro
-    marginBottom: 3, // Margen inferior pequeño para separación
-    alignSelf: "center"
+    fontSize: 14,
+    color: '#bebebe', // Gris más suave para los detalles
+    textAlign: 'center', // Texto centrado para una distribución equilibrada
+  },
+  dateText: {
+    fontSize: 14,
+    fontWeight: '800', // Semi-bold para destacar la fecha
+    color: '#FFF', // Blanco para contraste con el fondo oscuro
+    marginTop: 10, // Espacio después de los detalles del duelo
+    fontStyle: 'italic', // Cursiva para dar un toque distinto a la fecha
   },
   noDataText: {
     color: 'grey', // Mensajes de no datos en gris claro
@@ -147,7 +157,7 @@ const styles = StyleSheet.create({
     fontSize: 38, // Ajustado para ser coherente
   },
   button: {
-    backgroundColor: '#1F1F1F', // Un color que combine con el resto de la UI
+    backgroundColor: '#a565f2', // Un color que combine con el resto de la UI
     padding: 15,
     borderRadius: 10,
     alignItems: 'center', // Centrar el texto del botón
@@ -167,20 +177,6 @@ const styles = StyleSheet.create({
     fontSize: 18,
     color: 'white', // Texto claro
     fontWeight: 'bold',
-  },
-  duelsContainer: {
-    backgroundColor: '#282828', // Un fondo claro respecto al tema oscuro de la app
-    padding: 20, // Espacio interior para no pegar los elementos a los bordes
-    borderRadius: 15, // Bordes redondeados
-    shadowColor: '#000', // Sombra para darle profundidad
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.23,
-    shadowRadius: 2.62,
-    elevation: 4, // Elevación para Android para la sombra
-    marginBottom: 20, // Espacio debajo del contenedor para separarlo de otros elementos
   },
   dateText: {
     fontSize: 34, // Tamaño más pequeño para las fechas

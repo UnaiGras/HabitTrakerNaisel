@@ -15,7 +15,7 @@ const TimerScreen = ({ route }) => {
   const startTimeKey = `startTime_${id}`;
   const durationKey = `duration_${id}`;
 
-  console.log("Este es el id de el usuario: ", id)
+  console.log("tic tac")
 
   useEffect(() => {
     const checkTime = async () => {

@@ -29,19 +29,23 @@ const MilestoneCard = ({ visible, milestone, onHide }) => {
           setShowModal(false);
           onHide(); // Callback para limpiar cualquier estado en el componente padre
         });
-      }, 3000);
+      }, 10000);
     }
   }, [visible]);
 
   if (!showModal) return null;
 
   return (
-    <Modal transparent visible={showModal} animationType="none">
+    <Modal transparent visible={showModal} animationType="fade">
       <View style={styles.centeredView}>
         <Animated.View style={[styles.modalView, { opacity }]}>
           <Image source={imageMap[milestone.icon]} style={styles.milestoneImage} />
-          <Text style={styles.milestoneText}>{milestone.name}</Text>
-          <Text style={styles.milestoneDescription}>{milestone.description}</Text>
+              <Text style={styles.felicitacionesText}>
+            Felicidades, has alcanzado el hito{' '}
+            <Text style={styles.hitoNameText}>{milestone.name}</Text>
+          </Text>
+              <Text style={styles.milestoneDescription}>{milestone.description}</Text>
+              <Text style={styles.text}>Puedes ver tu progreso en la pestaña de niveles en la pagina pricipal</Text>
         </Animated.View>
       </View>
     </Modal>
@@ -84,6 +88,22 @@ const styles = StyleSheet.create({
     fontSize: 16,
     textAlign: 'center',
     color:"white"
+  },
+  felicitacionesText: {
+    fontSize: 24, // Cambia este valor según necesites
+    color: 'white',
+    textAlign: 'center', // Centra el texto si es necesario
+  },
+  hitoNameText: {
+    fontSize: 24, // Asegúrate de que coincide con el tamaño de felicitacionesText si quieres que sean del mismo tamaño
+    color: '#8A2BE2', // Este es un tono de lila; ajústalo según tu preferencia
+    fontStyle: 'italic',
+    fontWeight: "bold"
+  },
+  text: {
+    fontSize: 14, // Cambia este valor según necesites
+    color: 'white',
+    textAlign: 'center', // Centra el texto si es necesario
   },
 });
 

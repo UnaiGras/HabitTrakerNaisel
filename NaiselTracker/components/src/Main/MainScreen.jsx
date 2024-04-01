@@ -234,9 +234,6 @@ const styles = StyleSheet.create({
       borderColor: '#ffffff',
       marginRight: 10,
     },
-    subtaskBoxCompleted: {
-      backgroundColor: "blue", // El color del hábito o cualquier otro color que prefieras
-    },
     subtaskText: {
       color: '#ffffff',
       fontSize: 16,
@@ -303,16 +300,18 @@ const MainScreen = ({navigation}) => {
     const isFocused = useIsFocused();
 
     const [userProfile, setUserProfile] = useState({ points: 0, milestones: { currentMilestone: 0, nextMilestone: 0 } });
-    const [milestoneModalVisible, setMilestoneModalVisible] = useState(false);
-    const [currentMilestone, setCurrentMilestone] = useState(null);
-    const [habits, setHabits] = useState([]);
-    const [selectedHabit, setSelectedHabit] = useState(null);
-    const [viewMode, setViewMode] = useState('userHabits'); // 'userHabits' o 'challengeHabits'
+    const [milestoneModalVisible, setMilestoneModalVisible] = useState(false)
+    const [currentMilestone, setCurrentMilestone] = useState(null)
+    const [habits, setHabits] = useState([])
+    const [selectedHabit, setSelectedHabit] = useState(null)
+    const [viewMode, setViewMode] = useState('userHabits')
     const [sounds, setSounds] = useState({});
-    const [duelHabits, setDuelHabits] = useState({})
+    const [duelHabits, setDuelHabits] = useState([])
     const [me, setMe] = useState({})
     const [completedDuelHabits, setCompletedDuelHabits] = useState(new Set)
     const [termsAccepted, seTermsAccepted] = useState(true)
+    const [duelId, setDuelId] = useState("")
+    const [duelData, setDuelData] = useState(null)
 
     const [challengeHabits, setChallengeHabits] = useState([]);
     const [completedChallengeHabits, setCompletedChallengeHabits] = useState(new Set());
@@ -361,6 +360,25 @@ const MainScreen = ({navigation}) => {
   
       setSounds(soundObjects);
     }
+
+    const addPointsToUser = async () => {
+      const pointsToAdd = 100; // Definir los puntos a añadir
+    
+      try {
+        // Llama a la función para actualizar puntos y verificar hitos
+        let updatedUserProfile = await updatePointsAndCheckMilestones(pointsToAdd);
+        if (!updatedUserProfile) return;
+    
+        // Suponiendo que `updatePointsAndCheckMilestones` maneja la lógica para
+        // actualizar el perfil del usuario, verificar si se alcanzó un nuevo hito,
+        // y actualizar el estado adecuadamente.
+        console.log('Puntos añadidos correctamente.');
+      } catch (error) {
+        console.error('Error al añadir puntos al usuario:', error);
+      }
+    };
+    
+    
 
     const updatePointsAndCheckMilestones = async (pointsToAdd) => {
       try {
@@ -553,9 +571,76 @@ const MainScreen = ({navigation}) => {
       }
     };
 
-    const handleCompleteDuelHabit = async () => {
+    const handleCompleteDuelHabit = async (habitId) => {
+      try {
 
-    }
+        console.log("----Has entrado en la mutacion de completar el habito----")
+        const { data } = await completeDuelHabit({
+          variables: {
+            duelId: duelId, // Suponiendo acceso a la ID del duelo activo
+            habitId: habitId,
+          },
+        });
+        console.log("---Mutacion completada con exito")
+    
+        if (data && data.completeHabit) {
+          console.log("Data de la mutación recibida", data.completeHabit);
+    
+          // Encuentra los puntos del hábito específico
+          const habit = duelData.habits.find(habit => habit.id === habitId);
+          console.log("Hábito encontrado", habit);
+    
+          if (!habit) {
+            console.error("El hábito con el ID proporcionado no se encuentra en duelData");
+            return;
+          }
+    
+          const habitPoints = habit.points;
+          console.log("Puntos del hábito", habitPoints);
+    
+          // Verificar si el usuario actual es el challenger o el challenged usando las ID
+          const isChallenger = duelData.challenger.id === me.id;
+          const isChallenged = duelData.challenged.id === me.id;
+          console.log("Es Challenger?", isChallenger, "Es Challenged?", isChallenged);
+    
+          if (isChallenger) {
+            // Crea una copia actualizada de duelData con los nuevos puntos del challenger
+            const updatedDuelData = {
+              ...duelData,
+              challengerPoints: duelData.challengerPoints + habitPoints,
+            };
+          
+            console.log("Nuevos puntos del Challenger", updatedDuelData.challengerPoints);
+          
+            // Actualiza el estado de duelData con esta nueva copia
+            setDuelData(updatedDuelData);
+          } else if (isChallenged) {
+            // Crea una copia actualizada de duelData con los nuevos puntos del challenged
+            const updatedDuelData = {
+              ...duelData,
+              challengedPoints: duelData.challengedPoints + habitPoints,
+            };
+          
+            console.log("Nuevos puntos del Challenged", updatedDuelData.challengedPoints);
+          
+            // Actualiza el estado de duelData con esta nueva copia
+            setDuelData(updatedDuelData);
+          } else {
+            console.error("El usuario no es ni Challenger ni Challenged");
+            return;
+          }
+          
+          console.log("duelData actualizado con éxito");
+    
+          // Actualiza el estado de completedDuelHabits para incluir el hábito recién completado
+          setCompletedDuelHabits(prevCompleted => new Set(prevCompleted).add(habitId));
+          console.log("completedDuelHabits actualizado con éxito");
+        }
+      } catch (error) {
+        console.error("Error al completar el hábito: ", error);
+      }
+    };
+    
 
     const handleGoDuels = async () => {
       const isLoggedIn = await checkUserLoggedAndToken(true); // Utiliza la función para verificar si el usuario está logueado
@@ -623,6 +708,8 @@ const MainScreen = ({navigation}) => {
 
             if (data && data.duelDetails) {
               setDuelHabits(data.duelDetails.habits);
+              setDuelId(profile.activeDuel)
+              setDuelData(data.duelDetails)
               console.log("Habitos de el duelo",data.duelDetails.habits)
               // Comprobación de hábitos completados en el duelo por el usuario
               const meId = me.id; // Suponiendo que me.id es el id del usuario actual
@@ -782,11 +869,13 @@ const MainScreen = ({navigation}) => {
         {
            viewMode === 'userHabits' ? (
           <ScoreCounter finalScore={userProfile.points} increasePointsSound={sounds.increasePoints}/>
-        ):(
+        ): viewMode === 'challengeHabits' ? (
           <ChallengeScoreCounter 
           finalScore={completedChallengeHabits.size} 
           totalHabits={challengeHabits.length}
           />
+        ) : (
+          <DuelScoreCounter duelData={duelData}/>
         )
         }
         </View>
@@ -794,6 +883,9 @@ const MainScreen = ({navigation}) => {
 
       </View>
       <View >
+        <TouchableOpacity onPress={addPointsToUser} style={{backgroundColor: "white", padding:20}}>
+          <Text>Dale ahi miloko</Text>
+        </TouchableOpacity>
   <View>
       <View style={{ flexDirection: 'row', justifyContent: 'space-around', marginVertical: 5, backgroundColor: "#353535", borderRadius: 20, padding: 2, alignSelf: "center", width: "80%" }}>
       <TouchableOpacity onPress={() => setViewMode('userHabits')} style={[styles.toggleButton, viewMode === 'userHabits' ? styles.selectedButton : styles.unselectedButton]}>
@@ -817,6 +909,7 @@ const MainScreen = ({navigation}) => {
                 icon={item.icon}
                 duration={item.duration}
                 color={item.color}
+                id={item.id}
                 onComplete={() => handleCompleteHabit(item.id,item.points)}
                 isCompleted={completedHabits.has(item.id)}
                 openInfo={() => handlePresentModalPress(item)}
@@ -836,6 +929,7 @@ const MainScreen = ({navigation}) => {
               icon={item.icon}
               duration={item.duration}
               color={item.color}
+              id={item.id}
               onComplete={() => handleCompleteChallengeHabit(item.id)}
               isCompleted={completedChallengeHabits.has(item.id)}
               openInfo={() => handlePresentModalPress(item)}
@@ -862,6 +956,7 @@ const MainScreen = ({navigation}) => {
           icon={item.icon}
           duration={item.duration}
           color={item.color}
+          id={item.id}
           onComplete={() => handleCompleteDuelHabit(item.id)}
           isCompleted={completedDuelHabits.has(item.id)}
           openInfo={() => handlePresentModalPress(item)}
@@ -877,13 +972,13 @@ const MainScreen = ({navigation}) => {
         </View>
 
       <AppBar navigation={navigation} position={"home"}/>
-      {milestoneModalVisible && currentMilestone && (
+      
         <MilestoneCard
           visible={milestoneModalVisible}
           milestone={currentMilestone}
           onHide={() => setMilestoneModalVisible(false)} // Oculta el modal cuando la animación termine o el usuario cierra el modal
         />
-      )}
+      
 
   {selectedHabit &&
       <BottomSheetModal
@@ -891,7 +986,7 @@ const MainScreen = ({navigation}) => {
       index={1}
       snapPoints={snapPoints}
       style={{ backgroundColor: "#202020" }}
-      backgroundStyle={{ backgroundColor: "#353535" }}
+      backgroundStyle={{ backgroundColor: "#252525" }}
     >
       <View style={styles.modalContent}>
         <View style={styles.modalHeader}>
@@ -911,8 +1006,9 @@ const MainScreen = ({navigation}) => {
             renderItem={({ item, index }) => (
               <SubtaskItem 
               subtask={item} 
-              unUpdate={updateSubtaskCompletionDate}
+              onUpdate={updateSubtaskCompletionDate}
               habitId={selectedHabit.id}
+              color={selectedHabit.color}
               />
             )}
             keyExtractor={(item) => `subtask-${item.id}`}
@@ -971,8 +1067,22 @@ const ScoreCounter = ({ finalScore, increasePointsSound }) => {
   );
 };
 
-const SubtaskItem = ({ subtask, onUpdate, habitId }) => {
+const SubtaskItem = ({ subtask, onUpdate, habitId, color }) => {
   const [isCompleted, setIsCompleted] = useState(false);
+
+  // Función para comparar si la fecha pasada es igual a la fecha actual
+  const isToday = (dateString) => {
+    const todayString = new Date().toISOString().split('T')[0];
+    return dateString === todayString;
+  };
+  
+  useEffect(() => {
+    // Establecer isCompleted a true si lastCompletedDate es hoy
+    console.log("Estas en las subtareas", subtask);
+    if (subtask.lastCompletedDate && isToday(subtask.lastCompletedDate)) {
+      setIsCompleted(true);
+    }
+  }, [subtask])
 
   const handleToggleSubtask = () => {
     const newCompletedState = !isCompleted;
@@ -984,7 +1094,7 @@ const SubtaskItem = ({ subtask, onUpdate, habitId }) => {
 
   return (
     <TouchableOpacity style={styles.subtaskItem} onPress={handleToggleSubtask}>
-      <View style={[styles.subtaskBox, isCompleted && styles.subtaskBoxCompleted]} />
+      <View style={[styles.subtaskBox, isCompleted && {backgroundColor: color}]} />
       <Text style={[styles.subtaskText, isCompleted && styles.subtaskTextCompleted]}>{subtask.name}</Text>
     </TouchableOpacity>
   );
@@ -1017,6 +1127,66 @@ const ChallengeScoreCounter = ({ finalScore, totalHabits }) => {
     <Animated.Text style={styles.scoreText}>
       {score}/{totalHabits}
     </Animated.Text>
+  );
+};
+
+const DuelScoreCounter = ({ duelData }) => {
+  const challengerAnimatedValue = useRef(new Animated.Value(0)).current;
+  const challengedAnimatedValue = useRef(new Animated.Value(0)).current;
+  
+  // Estados para almacenar los valores de los puntos como texto
+  const [challengerScore, setChallengerScore] = useState('0');
+  const [challengedScore, setChallengedScore] = useState('0');
+
+  useEffect(() => {
+    // Asegurar que los puntos son números válidos
+    const challengerPoints = Number(duelData.challengerPoints) || 0;
+    const challengedPoints = Number(duelData.challengedPoints) || 0;
+  
+    // Animar puntos del challenger
+    Animated.timing(challengerAnimatedValue, {
+      toValue: challengerPoints,
+      duration: 3000,
+      easing: Easing.linear,
+      useNativeDriver: true,
+    }).start();
+  
+    // Animar puntos del challenged
+    Animated.timing(challengedAnimatedValue, {
+      toValue: challengedPoints,
+      duration: 3000,
+      easing: Easing.linear,
+      useNativeDriver: true,
+    }).start();
+  
+    // Listener para challenger
+    challengerAnimatedValue.addListener((animation) => {
+      const value = Math.floor(animation.value).toString();
+      setChallengerScore(value);
+    });
+  
+    // Listener para challenged
+    challengedAnimatedValue.addListener((animation) => {
+      const value = Math.floor(animation.value).toString();
+      setChallengedScore(value);
+    });
+  
+    // Limpiar listeners cuando el componente se desmonte
+    return () => {
+      challengerAnimatedValue.removeAllListeners();
+      challengedAnimatedValue.removeAllListeners();
+    };
+  }, [duelData.challengerPoints, duelData.challengedPoints]);
+
+  return (
+    <View>
+      <Text style={{color: 'white', fontSize: 18, marginBottom: 10}}>
+        {duelData.challenger.username}: <Animated.Text>{challengerScore}</Animated.Text>
+      </Text>
+      <Text style={{color: 'white', fontSize: 18}}>
+        {duelData.challenged.username}: <Animated.Text>{challengedScore}</Animated.Text>
+      </Text>
+    </View>
   );
 };
 

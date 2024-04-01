@@ -13,11 +13,22 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as Notifications from "expo-notifications"
 import AuthContext from '../../../AuthContext'
 import { checkUserLoggedAndToken } from '../Main/MainScreen';
+import { ScrollView } from 'react-native-gesture-handler';
+import { ME } from '../Main/mainQuerys';
+import { useLazyQuery } from '@apollo/client';
 
 const SettingsScreen = ({navigation}) => {
   const { reloadTheApp } = useContext(AuthContext)
   const [isEnabled, setIsEnabled] = useState(false)
   const [isLoggedIn, setIsLoggedIn] = useState(null)
+  const[username, setUsername] = useState("")
+
+  const [queryMyData] = useLazyQuery(ME, {
+    onCompleted: (data) => {
+      console.log("Esta es la data que se hace con la lazyquery: ",data)
+      setUsername(data.me.username)
+    }
+  })
 
   useEffect(() => {
     const fetchNotificationSetting = async () => {
@@ -35,6 +46,10 @@ const SettingsScreen = ({navigation}) => {
     const verifyLoginStatus = async () => {
       const result = await checkUserLoggedAndToken()
       setIsLoggedIn(result); 
+      if(result) {
+        console.log("Result es true")
+        await queryMyData()
+      }
   }
 
     fetchNotificationSetting()
@@ -106,10 +121,15 @@ const SettingsScreen = ({navigation}) => {
 
   return (
     <View style={styles.container}>
+      <ScrollView style={{paddingBottom: 30}}>
 
         <Text style={styles.title}>
             Ajustes
         </Text>
+        <View style={styles.profileContainer}>
+      <Ionicons name="person-circle-outline" size={120} color="gray" />
+      <Text style={styles.username}>{username}</Text>
+    </View>
       <View style={styles.settingItem}>
         <Ionicons name="notifications" size={24} color="#FFFFFF" />
         <Text style={styles.settingText}>Notificaciones</Text>
@@ -153,10 +173,11 @@ const SettingsScreen = ({navigation}) => {
         <Text style={styles.settingText}>Compartir</Text>
       </TouchableOpacity>
 
-      <TouchableOpacity style={[styles.settingItem, styles.delete]} onPress={handlePressAlert}>
+      <TouchableOpacity style={[styles.settingItem, styles.delete, {marginBottom: 20}]} onPress={handlePressAlert}>
         <Ionicons name="trash" size={24} color="red" />
         <Text style={styles.settingText}>Borrar Cuenta</Text>
       </TouchableOpacity>
+      </ScrollView>
     </View>
   );
 };
@@ -189,7 +210,7 @@ const styles = StyleSheet.create({
     marginLeft: 16, // Espaciado entre el icono y el texto
   },
   title: {
-    paddingVertical: 40,
+    paddingVertical: 15,
     fontSize: 30,
     fontWeight: "bold",
     color: "white",
@@ -202,6 +223,20 @@ const styles = StyleSheet.create({
   delete: {
     borderWidth: 0.5,
     borderColor: "red"
+  },
+  username: {
+    marginTop: 10,
+    fontSize: 26,
+    color: 'white',
+    fontWeight: 'bold',
+  },
+  profileContainer: {
+    alignItems: "center",
+    marginBottom: 20,
+    backgroundColor: "#252525",
+    marginHorizontal: 20,
+    borderRadius: 15,
+    paddingVertical: 10
   }
 });
 

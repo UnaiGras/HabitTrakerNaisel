@@ -9,6 +9,7 @@ const HabitCard = ({
   icon, 
   duration, 
   color, 
+  id,
   onComplete, 
   isCompleted, 
   openInfo
@@ -47,12 +48,19 @@ const HabitCard = ({
   const navigateToTimer = () => {
     // Extrae solo los dígitos de la cadena de duración, asumiendo que siempre termina con "m"
     const minutesOnly = parseInt(duration);
-  
+    console.log("EStos son los datos que se van a enviar a timerscreen: ", {
+      minutes: minutesOnly,
+      color,
+      iconName: icon,
+      title,
+      id
+    })
     navigation.navigate('TimerScreen', {
       minutes: minutesOnly,
       color: color,
       iconName: icon, // Aquí usas el icono que ya viene como prop
-      title: title
+      title: title,
+      id: id
     });
   };
   

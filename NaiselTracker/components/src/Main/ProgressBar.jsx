@@ -33,20 +33,22 @@ const ProgressBar = ({ userPoints }) => {
   }, []);
 
   return (
-    <ScrollView 
+    <ScrollView
     ref={scrollViewRef}
     contentContainerStyle={{ alignItems: 'center', paddingVertical: 20 }}>
       {sortedMilestones.map((milestone, index) => {
         let progress = 0;
-        // Verifica si este hito es el actual en progreso
+        // Asumiendo que los hitos están ordenados de mayor a menor como indicaste,
+        // el hito anterior (en términos de progreso) sería el siguiente en la lista (index + 1)
+        // y el "siguiente" hito (hacia el que el usuario avanza) sería el anterior en la lista (index - 1)
         if (userPoints < milestone.points) {
-          const nextMilestonePoints = index > 0 ? sortedMilestones[index - 1].points : milestone.points;
+          const nextMilestonePoints = index > 0 ? sortedMilestones[index - 1].points : Infinity;
           const prevMilestonePoints = index < sortedMilestones.length - 1 ? sortedMilestones[index + 1].points : 0;
-          progress = ((userPoints - prevMilestonePoints) / (nextMilestonePoints - prevMilestonePoints)) * 100;
+          progress = ((userPoints - prevMilestonePoints) / (milestone.points - prevMilestonePoints)) * 100;
         } else {
           progress = 100; // El hito ya fue alcanzado
         }
-        
+      
         return (
           <MilestoneItem
             key={milestone.id}
@@ -56,6 +58,7 @@ const ProgressBar = ({ userPoints }) => {
           />
         );
       })}
+
     </ScrollView>
   );
 };
