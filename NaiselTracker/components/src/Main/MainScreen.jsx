@@ -633,8 +633,11 @@ const MainScreen = ({navigation}) => {
           console.log("duelData actualizado con éxito");
     
           // Actualiza el estado de completedDuelHabits para incluir el hábito recién completado
-          setCompletedDuelHabits(prevCompleted => new Set(prevCompleted).add(habitId));
+          setCompletedDuelHabits(prevCompleted => new Set(prevCompleted)
+          .add(habitId))
+
           console.log("completedDuelHabits actualizado con éxito");
+          
         }
       } catch (error) {
         console.error("Error al completar el hábito: ", error);
@@ -883,9 +886,7 @@ const MainScreen = ({navigation}) => {
 
       </View>
       <View >
-        <TouchableOpacity onPress={addPointsToUser} style={{backgroundColor: "white", padding:20}}>
-          <Text>Dale ahi miloko</Text>
-        </TouchableOpacity>
+
   <View>
       <View style={{ flexDirection: 'row', justifyContent: 'space-around', marginVertical: 5, backgroundColor: "#353535", borderRadius: 20, padding: 2, alignSelf: "center", width: "80%" }}>
       <TouchableOpacity onPress={() => setViewMode('userHabits')} style={[styles.toggleButton, viewMode === 'userHabits' ? styles.selectedButton : styles.unselectedButton]}>
