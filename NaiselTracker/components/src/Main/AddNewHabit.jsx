@@ -11,6 +11,7 @@ import {
 } from 'react-native'
 import { Ionicons } from '@expo/vector-icons'
 import AsyncStorage from '@react-native-async-storage/async-storage'
+import COLORS from '../General/colors'
 
 const AddHabitScreen = ({navigation}) => {
   const [habitName, setHabitName] = useState('');
@@ -385,7 +386,7 @@ const styles = StyleSheet.create({
       borderWidth: 2,
     },
     createButton: {
-      backgroundColor: '#a565f2',
+      backgroundColor: COLORS.APP_PRIMARY_COLOR,
       paddingVertical: 20,
       paddingHorizontal: 30,
       borderRadius: 25, // Más redondeado que los botones de color y duración
@@ -422,7 +423,7 @@ const styles = StyleSheet.create({
       color: "white"
     },
     headerTitleAccent: {
-      color: '#a565f2', // Color lila para la segunda palabra
+      color: COLORS.APP_PRIMARY_COLOR, // Color lila para la segunda palabra
     },
     addButton: {
         backgroundColor: '#a565f2', // color lila

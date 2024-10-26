@@ -5,6 +5,7 @@ import AppBar from '../General/AppBar';
 import { checkUserLoggedAndToken } from '../Main/MainScreen';
 import { IS_USER_PREMIUM } from '../Main/mainQuerys';
 import { useQuery } from '@apollo/client';
+import COLORS from '../General/colors';
 
 const challenges = [{
     id: 28398,
@@ -99,7 +100,7 @@ const challenges = [{
           desc: "Realizar 30 minutos de ejercicio cardiovascular diario para aumentar la quema de calorías.",
           duration: "30m",
           points: 50,
-          color: "#f44336",
+          color: "#F4C7C3",
           subTasks: []
         },
         {
@@ -109,7 +110,7 @@ const challenges = [{
           desc: "Incorporar rutinas de fuerza 4 veces a la semana para tonificar y construir músculo.",
           duration: "1h",
           points: 70,
-          color: "#9c27b0",
+          color: "#A8D5BA",
           subTasks: []
         },
         {
@@ -119,7 +120,7 @@ const challenges = [{
           desc: "Consumir al menos 2 litros de agua al día para apoyar la eliminación de toxinas y la hidratación.",
           duration: "All day",
           points: 20,
-          color: "#2196f3",
+          color: "#FFD8B5",
           subTasks: []
         },
         {
@@ -355,7 +356,7 @@ const ChallengesFeed = ({navigation}) => {
     },
     pts: {
       fontSize: 16,
-      color: '#a565f2',
+      color: COLORS.APP_PRIMARY_COLOR,
       fontWeight: '700',
     },
     image: {

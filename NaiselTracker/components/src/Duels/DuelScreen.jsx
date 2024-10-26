@@ -3,6 +3,7 @@ import { View, Text, TouchableOpacity, ScrollView, StyleSheet } from 'react-nati
 import { useQuery } from '@apollo/client';
 import { DUEL_REQUESTS_PENDING, ACTIVE_DUELS } from './duelQuerys';
 import { Ionicons } from '@expo/vector-icons';
+import COLORS from '../General/colors';
 
 const DuelScreen = ({navigation}) => {
   const { data: dataRequests, loading: loadingRequests, error: errorRequests } = useQuery(DUEL_REQUESTS_PENDING, {
@@ -157,7 +158,7 @@ const styles = StyleSheet.create({
     fontSize: 38, // Ajustado para ser coherente
   },
   button: {
-    backgroundColor: '#a565f2', // Un color que combine con el resto de la UI
+    backgroundColor: COLORS.APP_PRIMARY_COLOR, // Un color que combine con el resto de la UI
     padding: 15,
     borderRadius: 10,
     alignItems: 'center', // Centrar el texto del botón

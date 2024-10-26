@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Animated, View, Text, StyleSheet, Modal, Image } from 'react-native';
 import { imageMap } from './ProgressBar';
+import COLORS from '../General/colors';
 //El problema es que milestone no esta cojiendo la imagende require y solo tiene el nombre, hay que ponerle u indice o exportar elde progressbar
 
 
@@ -65,7 +66,7 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     padding: 35,
     alignItems: 'center',
-    shadowColor: '#a565f2',
+    shadowColor: COLORS.APP_PRIMARY_COLOR,
     shadowOffset: {
       width: 0,
       height: 2,

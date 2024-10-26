@@ -16,6 +16,7 @@ import {
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation, useRoute } from '@react-navigation/native';
+import COLORS from '../General/colors';
 
 const ChatScreen = () => {
   const navigation = useNavigation();
@@ -71,7 +72,7 @@ const ChatScreen = () => {
       }))
       
 
-      const response = await fetch('https://16.171.234.11:3000/chat', {
+      const response = await fetch('http://192.168.1.19:3000/chat', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -162,7 +163,7 @@ const ChatScreen = () => {
           placeholderTextColor="#666"
                 />
         <TouchableOpacity onPress={sendMessage}>
-          <Ionicons name="send" size={24} color="#a565f2"/>
+          <Ionicons name="send" size={24} color={COLORS.APP_PRIMARY_COLOR}/>
         </TouchableOpacity>
       </View>
     </KeyboardAvoidingView>
@@ -216,13 +217,13 @@ const styles = StyleSheet.create({
     },
     userMessage: {
       alignSelf: 'flex-end',
-      backgroundColor: '#4A90E2',
+      backgroundColor: '#353535',
     },
     botMessage: {
       alignSelf: 'flex-start',
-      backgroundColor: '#292929',
+      backgroundColor: COLORS.APP_PRIMARY_COLOR,
       borderWidth: 1,
-      borderColor: "#a565f2"
+    
     },
     messageText: {
       color: 'white',

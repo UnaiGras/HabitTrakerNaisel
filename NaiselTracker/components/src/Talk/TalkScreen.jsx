@@ -4,6 +4,7 @@ import AppBar from '../General/AppBar';
 import { checkUserLoggedAndToken } from '../Main/MainScreen';
 import { useQuery } from '@apollo/client';
 import { IS_USER_PREMIUM } from '../Main/mainQuerys';
+import COLORS from '../General/colors';
 
 const ProfessionalCard = ({ name, desc, image, pts }) => {
   return (
@@ -100,12 +101,12 @@ const TalkScreen = ({navigation}) => {
         padding: 20,
         marginBottom: 30,
         alignItems: 'center',
-        shadowColor: '#a565f2',
+        shadowColor: COLORS.APP_PRIMARY_COLOR,
         shadowOffset: {
-          width: 0,
-          height: 2,
+          width: 4,
+          height: 4,
         },
-        shadowOpacity: 0.23,
+        shadowOpacity: 0.9,
         shadowRadius: 2.62,
         elevation: 8,
       },

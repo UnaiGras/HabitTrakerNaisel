@@ -12,6 +12,7 @@ import { LineChart } from 'react-native-chart-kit';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Ionicons } from '@expo/vector-icons';
 import { AnimatedCircularProgress } from 'react-native-circular-progress';
+import COLORS from '../General/colors';
 
 const StatsScreen = () => {
     
@@ -132,7 +133,7 @@ const StatsScreen = () => {
       size={220}
       width={30}
       fill={userProfile.productivity.current}
-      tintColor="#9b59b6"
+      tintColor={COLORS.APP_PRIMARY_COLOR}
       backgroundColor="#414952"
     >
       {fill => <Text style={styles.progressText}>{`${Math.round(fill)}%`}</Text>}
@@ -164,7 +165,7 @@ const StatsScreen = () => {
       height={200}
       yAxisLabel="%"
       chartConfig={{
-        backgroundColor: '#a565f2',
+        backgroundColor: COLORS.APP_PRIMARY_COLOR,
         backgroundGradientFrom: '#353535',
         backgroundGradientTo: '#353535',
         decimalPlaces: 1,
@@ -176,7 +177,7 @@ const StatsScreen = () => {
         propsForDots: {
           r: '6',
           strokeWidth: '3',
-          stroke: '#a565f2'
+          stroke: COLORS.APP_PRIMARY_COLOR
         }
       }}
       bezier
@@ -249,7 +250,7 @@ const styles = StyleSheet.create({
         alignItems: 'center',
       },
       currentDay: {
-        backgroundColor: '#4CD964', // Color de fondo para el día actual
+        backgroundColor: COLORS.APP_PRIMARY_COLOR, // Color de fondo para el día actual
       },
       dayLabel: {
         color: '#ffffff',
@@ -314,7 +315,7 @@ const styles = StyleSheet.create({
         padding: 5
       },
       buttonSelected: {
-        backgroundColor: "#191919",
+        backgroundColor: COLORS.APP_PRIMARY_COLOR,
       },
       productivityCard: {
         backgroundColor: '#252525', // Fondo blanco para la tarjeta

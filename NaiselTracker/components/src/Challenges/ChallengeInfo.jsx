@@ -3,6 +3,7 @@ import { View, Text, TouchableOpacity, StyleSheet, FlatList } from 'react-native
 import { Ionicons } from '@expo/vector-icons';
 import { BottomSheetModal, BottomSheetModalProvider } from '@gorhom/bottom-sheet';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import COLORS from '../General/colors';
 
 const ChallengeDetails = ({ navigation, route }) => {
     const { challenge } = route.params; // Asume que challenge se pasa a través de navigation params
@@ -67,7 +68,16 @@ const ChallengeDetails = ({ navigation, route }) => {
           <Text style={styles.habitDuration}>{selectedHabit?.duration} minutes</Text>
           <FlatList
             data={selectedHabit?.subTasks}
-            renderItem={({ item }) => <Text style={styles.subtaskText}>{item.name}</Text>}
+            renderItem={({ item }) => 
+            <View style={{
+              backgroundColor: "#252525",
+              marginBottom: 10,
+              padding: 5,
+              borderRadius: 10
+
+            }}>
+              <Text style={styles.subtaskText}>{item.name}</Text>
+              </View>}
             keyExtractor={(item) => `subtask-${item.id}`}
           />
         </View>
@@ -77,8 +87,17 @@ const ChallengeDetails = ({ navigation, route }) => {
     return (
         <BottomSheetModalProvider>
       <View style={styles.container}>
-        <Text style={styles.title}>{challenge.title}</Text>
-        <Text style={styles.description}>{challenge.desc}</Text>
+        <View style={{
+          margin: 20,
+          padding: 20,
+          backgroundColor: "#282828",
+          borderRadius: 20,
+          alignItems: "center"
+        }}>
+          <Text style={styles.title}>{challenge.title}</Text>
+          <Text style={styles.description}>{challenge.desc}</Text>
+        </View>
+    
         <FlatList
           data={challenge.habits}
           renderItem={({ item }) => (
@@ -202,7 +221,7 @@ const styles = StyleSheet.create({
       },
       finishButton:{
         position: "absolute",
-        backgroundColor: '#8e44ad', // Un color lila como ejemplo
+        backgroundColor: COLORS.APP_PRIMARY_COLOR, // Un color lila como ejemplo
         width: "80%",
         padding: 20,
         borderRadius: 30,

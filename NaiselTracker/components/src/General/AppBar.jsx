@@ -1,7 +1,8 @@
 import React from 'react'
 import { View, StyleSheet, Image, TouchableOpacity, Text} from 'react-native'
 import { Ionicons } from '@expo/vector-icons'
-
+import COLORS from './colors'
+import { checkUserLoggedAndToken } from '../Main/MainScreen'
 
 const styles = StyleSheet.create({
     container: {
@@ -14,7 +15,7 @@ const styles = StyleSheet.create({
         alignItems: "center",
         alignSelf: "center",
         borderRadius: 20,
-        paddingVertical: 15,
+        paddingVertical: 10,
         marginBottom: 30
     },
     button: {
@@ -26,9 +27,8 @@ const styles = StyleSheet.create({
     },
     centralButtonStyle:{
         alignItems: "center",
-        bottom: 20, // Ajustamos la posición para que sobresalga hacia arriba
         zIndex: 1, // Aseguramos que se superponga sobre los otros elementos
-        backgroundColor: '#a565f2', // Añadimos un fondo, cambia el color como necesites
+        backgroundColor: COLORS.APP_PRIMARY_COLOR, // Añadimos un fondo, cambia el color como necesites
         borderRadius: 35, // Hacemos que el botón sea circular
         width: 55, // Ajustamos el ancho del botón
         height: 55, // Ajustamos la altura del botón
@@ -44,6 +44,16 @@ const styles = StyleSheet.create({
 
 const AppBar = ({navigation, position}) => {
 
+    const handleGoDuels = async () => {
+        const isLoggedIn = await checkUserLoggedAndToken(true); // Utiliza la función para verificar si el usuario está logueado
+        console.log("is logged: ", isLoggedIn)
+        if (isLoggedIn) {
+            // Si el usuario está logueado, navega a DuelScreen
+            navigation.navigate("DuelScreen");
+        }
+        // Si el usuario no está logueado, checkUserLoggedAndToken ya habrá mostrado un alerta, así que no necesitas hacer nada más aquí.
+    };
+
     return(
         <View style={styles.container}>
             <TouchableOpacity
@@ -53,7 +63,7 @@ const AppBar = ({navigation, position}) => {
                 }}
             >
                 {position === "home" ? (
-                <Ionicons name="home" size={25} color="#a565f2"/>
+                <Ionicons name="home" size={25} color={COLORS.APP_PRIMARY_COLOR}/>
                 ):(
                 <Ionicons name="home-outline" size={25} color={"white"}/>
                 )}
@@ -67,7 +77,7 @@ const AppBar = ({navigation, position}) => {
                 }}
                 >
                 {position === "challenge" ? (
-                    <Ionicons name="flag" size={25} color={"#a565f2"}/>
+                    <Ionicons name="flag" size={25} color={COLORS.APP_PRIMARY_COLOR}/>
                 ):(
                     <Ionicons name="flag" size={25} color="white" />
                 )}
@@ -77,9 +87,9 @@ const AppBar = ({navigation, position}) => {
         { position == "home" &&
             <TouchableOpacity 
                 style={styles.centralButtonStyle} 
-                onPress={() => {navigation.navigate("AddHabitScreen")}}
+                onPress={() => {navigation.navigate("TalkScreen")}}
             >
-                <Ionicons name="add" size={40} color="white" />
+                <Ionicons name="chatbubbles" size={40} color="white" />
             </TouchableOpacity>
             }
             <TouchableOpacity
@@ -89,7 +99,7 @@ const AppBar = ({navigation, position}) => {
                 }}
                 >
                 {position === "LevelScreen" ? (
-                <Ionicons name="diamond-outline" size={25} color="#a565f2"/>
+                <Ionicons name="diamond-outline" size={25} color={COLORS.APP_PRIMARY_COLOR}/>
                 ):(
                 <Ionicons name="diamond-outline" size={25} color="white" />
                 )}
@@ -98,16 +108,17 @@ const AppBar = ({navigation, position}) => {
             </TouchableOpacity>
             <TouchableOpacity  
             style={styles.button}
-            onPress={() => {navigation.navigate("TalkScreen")}}
+            onPress={handleGoDuels}
             >
     
-                        <Ionicons name='person' size={25} color="white"/>
+                        <Ionicons name="people-circle" size={25} color="white"/>
                     
-                    <Text style={styles.text}>Hablar</Text>
+                    <Text style={styles.text}>Duelos</Text>
             </TouchableOpacity>
       </View>
         
 
     )
 }
+
 export default AppBar

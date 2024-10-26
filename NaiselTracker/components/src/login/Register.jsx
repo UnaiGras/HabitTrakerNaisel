@@ -60,12 +60,12 @@ export default function Register({navigation}) {
 
             <ScrollView style={{
                     height: '100%',
-                    backgroundColor: 'black'
+                    backgroundColor: '#151515'
                 }}>
 
                     <View style={{width: '100%', alignItems: 'center', marginTop: 50}}>
                     <View style= { { borderRadius: 100}}>
-                       <Ionicons name="person-circle" size={200}/>
+                       <Ionicons name="person-circle" size={200} color={"gray"}/>
                     </View>
                     </View>
                     <View style={{
@@ -79,6 +79,7 @@ export default function Register({navigation}) {
                             value={formik.values.name}
                             onChangeText={formik.handleChange('name')}
                             onBlur={formik.handleBlur('name')}
+                            placeholderTextColor={"gray"}
                             placeholder="Tu Nombre"
                         />
                         {formik.touched.name && formik.errors.name ? (
@@ -90,6 +91,7 @@ export default function Register({navigation}) {
                             value={formik.values.email}
                             onChangeText={formik.handleChange('email')}
                             onBlur={formik.handleBlur('email')}
+                            placeholderTextColor={"gray"}
                             placeholder="Email"
                         />
                         {formik.touched.email && formik.errors.email ? (
@@ -101,6 +103,7 @@ export default function Register({navigation}) {
                             value={formik.values.username}
                             onChangeText={formik.handleChange('username')}
                             onBlur={formik.handleBlur('username')}
+                            placeholderTextColor={"gray"}
                             placeholder="Username"
                         />
                         {formik.touched.username && formik.errors.username ? (
@@ -113,6 +116,7 @@ export default function Register({navigation}) {
                             onChangeText={formik.handleChange('password')}
                             onBlur={formik.handleBlur('password')}
                             placeholder="Password"
+                            placeholderTextColor={"gray"}
                             secureTextEntry
                         />
                         {formik.touched.password && formik.errors.password ? (
@@ -145,7 +149,7 @@ export default function Register({navigation}) {
 const styles = StyleSheet.create({
 
     input: {
-        backgroundColor: '#151515',
+        backgroundColor: '#212121',
         color: '#ffffff',
         borderRadius: 8,
         padding: 10,

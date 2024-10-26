@@ -28,6 +28,7 @@ import { COMPLETE_DUEL_HABIT, DUEL_DETAILS  } from '../Duels/duelQuerys';
 import { useMutation, useLazyQuery, useQuery } from '@apollo/client';
 import { ME } from './mainQuerys';
 import TermsAndConditions from '../General/TermsAndConditions';
+import COLORS from '../General/colors';
 
 
 
@@ -55,7 +56,7 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
   },
   monthText: {
-    color: '#a565f2', // Lila
+    color: COLORS.APP_PRIMARY_COLOR, // Lila
     fontSize: 28,
     fontWeight: 'bold',
     marginLeft: 5, // Agrega un pequeño espacio entre el día y el mes
@@ -84,7 +85,7 @@ const styles = StyleSheet.create({
   modalView: {
     borderRadius: 20,
     alignItems: 'center',
-    shadowColor: '#a565f2',
+    shadowColor: COLORS.APP_PRIMARY_COLOR,
     shadowOffset: {
       width: 4,
       height: 4,
@@ -103,18 +104,17 @@ const styles = StyleSheet.create({
     backgroundColor: 'grey',
   },
   scoreContainer: {
-    backgroundColor: '#191919', // Un color más oscuro que el fondo de la pantalla
-    justifyContent: 'center', // Centra el contenido verticalmente
+    backgroundColor: COLORS.APP_PRIMARY_COLOR,
+    justifyContent: 'center',
     alignItems: 'center', // Centra el contenido horizontalmente
     padding: 20,
-    marginVertical: 20,
+    marginVertical: 10,
     borderRadius: 20,
-    // Propiedades de sombreado para efecto de elevación
-    shadowColor: '#a565f2', // Color lila para el sombreado
-    shadowOffset: { width: 0, height: 4 }, // Desplazamiento del sombreado
-    shadowOpacity: 0.3, // Opacidad del sombreado
-    shadowRadius: 5, // Radio del borde del sombreado
-    elevation: 10, // Elevación para Android
+    shadowColor: "white", // Cambiado a negro para más contraste
+    shadowOffset: { width: 10, height: 10 }, // Aumentado el desplazamiento
+    shadowOpacity: 0.9, // Incrementada la opacidad para una sombra más oscura
+    shadowRadius: 15, // Aumentado el radio para una sombra más difusa
+    elevation: 20, // Elevación aumentada para Android
   },
   
   scoreText: {
@@ -271,6 +271,21 @@ const styles = StyleSheet.create({
     },
     completedAllHabitsStyle: {
       
+    },
+    addButton: {
+      backgroundColor: COLORS.APP_PRIMARY_COLOR, // Cambia al color deseado
+      paddingVertical: 5,
+      marginVertical: 10,
+      borderRadius: 10,
+      alignSelf: "center",
+      alignItems: "center",
+      justifyContent: "center",
+      shadowColor: '#000',
+      shadowOffset: { width: 0, height: 2 },
+      shadowOpacity: 0.25,
+      shadowRadius: 3.84,
+      elevation: 5,
+      width: "100%"
     }
     // Continuar con los estilos para modalBody, addButton, tabContainer, etc.
   
@@ -839,9 +854,6 @@ const MainScreen = ({navigation}) => {
             <Text style={styles.monthText}>{year}</Text>
           </View>
         <View style={styles.iconContainer}>
-        <TouchableOpacity onPress={handleGoDuels}>
-            <Ionicons name="people-circle" size={30} color="white" style={{ marginRight: 20 }} />
-          </TouchableOpacity>
           <TouchableOpacity onPress={() => navigation.navigate("StatsScreen")}>
             <Ionicons name="stats-chart" size={30} color="white" style={{ marginRight: 20 }} />
           </TouchableOpacity> 
@@ -877,9 +889,17 @@ const MainScreen = ({navigation}) => {
           finalScore={completedChallengeHabits.size} 
           totalHabits={challengeHabits.length}
           />
-        ) : (
-          <DuelScoreCounter duelData={duelData}/>
-        )
+        ) : viewMode === 'duelHabits' ? (
+          duelData ? (
+            <DuelScoreCounter duelData={duelData} />
+          ) : (
+            <View style={{ justifyContent: "center", alignItems: "center", height: 70 }}>
+              <Text style={{ textAlign: 'center', color: "white", fontSize: 20 }}>
+                No Hay Datos
+              </Text>
+            </View>
+          )
+        ) : null
         }
         </View>
 
@@ -919,6 +939,11 @@ const MainScreen = ({navigation}) => {
           keyExtractor={(item) => item.id.toString()}
           contentContainerStyle={{paddingBottom: 50 }}
           ListFooterComponent={<View style={{ height: 600 }} />}
+          ListHeaderComponent={
+            <TouchableOpacity style={styles.addButton} onPress={() => navigation.navigate("AddHabitScreen")}>
+              <Ionicons name="add" size={24} color="white" />
+            </TouchableOpacity>
+          }
         />
   ): viewMode === 'challengeHabits' ? (
     challengeHabits && challengeHabits.length > 0 ? (
@@ -948,26 +973,34 @@ const MainScreen = ({navigation}) => {
       </Text>
     </View>
     )
-  ): (
-    <FlatList
-      data={duelHabits}
-      renderItem={({ item }) => (
-        <HabitCard
-          title={item.name}
-          icon={item.icon}
-          duration={item.duration}
-          color={item.color}
-          id={item.id}
-          onComplete={() => handleCompleteDuelHabit(item.id)}
-          isCompleted={completedDuelHabits.has(item.id)}
-          openInfo={() => handlePresentModalPress(item)}
-        />
-      )}
-      keyExtractor={(item) => item.id.toString()}
-      contentContainerStyle={{paddingBottom: 50 }}
-      ListFooterComponent={<View style={{ height: 600 }} />}
-    />
-  )
+  ): viewMode === 'duelHabits' ? (
+    duelHabits && duelHabits.length > 0 ? (
+      <FlatList
+        data={duelHabits}
+        renderItem={({ item }) => (
+          <HabitCard
+            title={item.name}
+            icon={item.icon}
+            duration={item.duration}
+            color={item.color}
+            id={item.id}
+            onComplete={() => handleCompleteDuelHabit(item.id)}
+            isCompleted={completedDuelHabits.has(item.id)}
+            openInfo={() => handlePresentModalPress(item)}
+          />
+        )}
+        keyExtractor={(item) => item.id.toString()}
+        contentContainerStyle={{paddingBottom: 50}}
+        ListFooterComponent={<View style={{ height: 600 }} />}
+      />
+    ) : (
+      <View style={{ justifyContent: "center", alignItems: "center", height: 200 }}>
+        <Text style={{ textAlign: 'center', color: "gray", fontSize: 20 }}>
+          No hay duelos activos.
+        </Text>
+      </View>
+    )
+  ) : null
   }
 </View>
         </View>

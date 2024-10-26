@@ -2,6 +2,7 @@
 import React, {useRef, useEffect}from 'react';
 import { View, Text, StyleSheet, Image, ScrollView } from 'react-native';
 import milestones from '../../../milestones'; // Asegúrate de que la ruta es correcta
+import COLORS from '../General/colors';
 
 export const imageMap = {
   'semilla.png': require('../../../assets/semilla.png'),
@@ -120,8 +121,8 @@ const MilestoneItem = ({ milestone, userPoints, progress }) => {
     },
     progressBarFill: {
       width: '100%', // Esto puede permanecer igual
-      backgroundColor: 'white', // Ajusta el color si lo deseas 
-      shadowColor: 'white', // Color de la sombra lila
+      backgroundColor: COLORS.APP_PRIMARY_COLOR, // Ajusta el color si lo deseas 
+      shadowColor: COLORS.APP_PRIMARY_COLOR, // Color de la sombra lila
       shadowOffset: { width: 0, height: -20 }, // Desplazamiento de la sombra
       shadowOpacity: 1.5, // Opacidad de la sombra
       shadowRadius: 20, // Radio de desenfoque de la sombra
@@ -134,7 +135,7 @@ const MilestoneItem = ({ milestone, userPoints, progress }) => {
       backgroundColor: '#191919', // Fondo de la tarjeta
       borderRadius: 10, // Bordes redondeados de la tarjeta
       padding: 10, // Padding interno de la tarjeta
-      shadowColor: '#8A2BE2', // Color de la sombra lila
+      shadowColor: COLORS.APP_PRIMARY_COLOR, // Color de la sombra lila
       shadowOffset: { width: 0, height: 4 }, // Desplazamiento de la sombra
       shadowOpacity: 0.3, // Opacidad de la sombra
       shadowRadius: 5, // Radio de desenfoque de la sombra
